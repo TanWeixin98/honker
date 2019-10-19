@@ -1,6 +1,7 @@
 const emailer = require( './email' );
 let  dbUtils = require( './dbUtils' );
 const db = dbUtils.getDB().collection('users');
+const cookie = require ( 'cookie' );
 
 module.exports = {
 
@@ -43,9 +44,9 @@ module.exports = {
             });
     },
 
-    verifyUser: function(req, res){
+    verifyUser: (req, res) => {
         db.findOne({ 'email' : req.body.email })
-            .then(function(user){
+            .then((user) => {
                 if(user == null){
                     res.json({ statis: 'error', error: 'You have not signed up yet' });
                     console.error(req.body.email + ' tried to verify but no account exists for that email.');
@@ -63,6 +64,33 @@ module.exports = {
                 else{
                     console.error(req.body.email + ' tried to verify with incorrect key');
                     res.json({status: 'error', error: 'Inccorect key'});
+                }
+            });
+    },
+
+    loginUser: (req, res) => {
+        var email = req.body.email;
+        var password = req.body.password;
+        db.findOne({ 'email': email, 'password': password })
+            .then((user) => {
+                if(!user){
+                    console.log('Invalid login for %s %s', email, password);
+                    res.json({ status: 'error', error: 'The email or password provided is incorrect.' });
+                }
+                else if(user.verificationKey){
+                    console.log(email + ' tried to login but was unverified.');
+                    res.json({ status: 'error', error: 'This account is still unverified. Check your email.' });
+                }
+                else{
+                    console.log(email + 'logged in');
+                    let options = {
+                        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+                        signed: true
+                    }
+                    let sessionCookie = cookie.serialize('email', email);
+                    res.cookie('authToken', sessionCookie, options);
+                    res.json({ status: 'OK' });
+                    // Redirect to home page
                 }
             });
     }
