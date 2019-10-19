@@ -1,0 +1,4 @@
+Note: node module in this folder must be loaded globally
+
+Also need to run 'export NODE_PATH=/usr/lib/node_modules' to tell node to look into the global folder
+
