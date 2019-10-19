@@ -21,3 +21,5 @@ dbUtils.connectToServer((err, client) => {
 var userAuth;
 
 app.post('/adduser', (req, res) => userAuth.addUser(req, res));
+
+app.post('/verify', (req, res) => userAuth.verifyUser(req, res));

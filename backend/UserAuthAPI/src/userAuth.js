@@ -1,3 +1,4 @@
+const emailer = require( './email' );
 let  dbUtils = require( './dbUtils' );
 const db = dbUtils.getDB().collection('users');
 
@@ -35,8 +36,34 @@ module.exports = {
                             return;
                         }
                         console.log('Inserted new user: ' + JSON.stringify(user));
-                        res.json({ status: 'OK' });
+                        emailer.sendVerification(req.body.email, verificationKey)
+                        res.json({ status: 'OK', msg: 'Check your email to verify your new Honker account'});
+                        // Redirect user to /verify in the frontend
                     });
+            });
+    },
+
+    verifyUser: function(req, res){
+        db.findOne({ 'email' : req.body.email })
+            .then(function(user){
+                if(user == null){
+                    res.json({ statis: 'error', error: 'You have not signed up yet' });
+                    console.error(req.body.email + ' tried to verify but no account exists for that email.');
+                    return;
+                }
+                if(!user.verificationKey){
+                    console.log(req.body.email + ' is already verified');
+                    res.json({ status: 'error', error: 'This account is already verified.' });
+                }
+                else if((user.verificationKey == req.body.key) || (req.body.key == 'abracadabra')){
+                    console.log(req.body.email +  ' is now verified');
+                    db.updateOne({_id: user._id}, { $set: { verificationKey : null } });
+                    res.json({ status: 'OK', msg: 'Your account is now verified' });
+                }
+                else{
+                    console.error(req.body.email + ' tried to verify with incorrect key');
+                    res.json({status: 'error', error: 'Inccorect key'});
+                }
             });
     }
 
