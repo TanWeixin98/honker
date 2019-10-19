@@ -46,7 +46,9 @@ amqp.connect(amqp_url, function(connection_err, connection){
       }
       channel.bindQueue(search_queue.queue, exchange, 'search_tweet');
       channel.consume(search_queue.queue, function(msg){
-        console.log(msg);
+        //result is the return item
+        channel.sendToQueue('tweet_rpc', Buffer.from(result.toString()),
+                        {replyTo: search_queue.queue});
       },{noAck: true});
     });
 
