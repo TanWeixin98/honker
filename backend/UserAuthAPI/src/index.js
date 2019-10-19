@@ -25,3 +25,5 @@ app.post('/adduser', (req, res) => userAuth.addUser(req, res));
 app.post('/verify', (req, res) => userAuth.verifyUser(req, res));
 
 app.post('/login', (req, res) => userAuth.loginUser(req, res));
+
+app.post('/logout', (req, res) => userAuth.logoutUser(req, res));

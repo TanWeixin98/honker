@@ -82,7 +82,7 @@ module.exports = {
                     res.json({ status: 'error', error: 'This account is still unverified. Check your email.' });
                 }
                 else{
-                    console.log(email + 'logged in');
+                    console.log(email + ' logged in');
                     let options = {
                         maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
                         signed: true
@@ -93,6 +93,19 @@ module.exports = {
                     // Redirect to home page
                 }
             });
+    },
+
+    logoutUser: (req, res) => {
+        var authToken = req.signedCookies.authToken;
+        res.clearCookie('authToken', { signed: true });
+        if(!authToken){
+            res.json({ status: 'error', error: 'Failed to log out. Please log in again.' });
+            console.log('A user tried to log out with a null or modified cookie');
+            return;
+        }
+        var email = cookie.parse(authToken).email;
+        res.json({ status: 'OK', msg: 'You have succesfully logged out.' });
+        console.log(email + ' logged out');
     }
 
 }

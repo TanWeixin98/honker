@@ -1,4 +1,4 @@
 - [x] adduser
 - [x] verify
 - [x] login
-- [ ] logout
+- [x] logout
