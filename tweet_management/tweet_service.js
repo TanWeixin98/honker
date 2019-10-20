@@ -36,7 +36,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
     channel.assertExchange(exchange, 'direct', {durable: false});
 
     //add item
-    channel.assertQueue('add_item', {exclusive: true}, function(add_err, add_queue){
+    channel.assertQueue('add_item', {exclusive: true, durable: false}, function(add_err, add_queue){
       if(add_err){
         logger.error("Assert add queue failed. ", add_err);
         return;
@@ -56,7 +56,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
     });
 
     //search
-    channel.assertQueue('search_item', {exclusive: true}, function(search_err, search_queue){
+    channel.assertQueue('search_item', {exclusive: true, durable: false}, function(search_err, search_queue){
       if(search_err){
         logger.error("Assert search queue failed. ", search_err);
         return;
@@ -73,9 +73,12 @@ amqp.connect(amqp_url, function(connection_err, connection){
           }
           logger.info("Item search: " + payload_str 
                       + " RESULT:" + result.toString());
-          channel.sendToQueue('tweet_rpc', Buffer.from(result.toString()), {replyTo: search_queue.queue});
+          console.log(msg.properties.replyTo);
+          console.log(msg.properties.correlationId);
+          channel.sendToQueue(msg.properties.replyTo, Buffer.from(result.toString()), {correlationId: msg.properties.correlationId});
+          channel.ack(msg)
         });
-      },{noAck: true});
+      });
     });
   });
 });
