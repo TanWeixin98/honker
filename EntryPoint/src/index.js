@@ -27,7 +27,11 @@ app.post('/verify', (req, res) => {
 
 app.post('/login', (req, res) => {
     messenger.sendRPCMessage(JSON.stringify(req.body), 'login')
-        .then((response) => res.json(response));
+        .then((response) => {
+            if(response.status == 'OK')
+                res.cookie('authToken', cookies.createAuthToken(req.body.email), { signed: true });
+            res.json(response);
+        });
 });
 
 app.post('/logout', (req, res) => {
