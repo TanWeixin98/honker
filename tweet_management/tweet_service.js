@@ -1,10 +1,11 @@
 const amqp = require('amqplib/callback_api');
 
 const Logger = require('./utils/logger.js');
-const mongodb = require('../utils/mongodb.js')
+const mongodb = require('./utils/mongodb.js');
 
-const amqp_url = "amqp://localhost"
-const mongo_url = "mongodb://192.168.122.12:27017/tweet"
+const mongo_ip = "192.168.122.12:27017";
+const amqp_url = "amqp://localhost";
+const mongo_url = "mongodb://" + mongo_ip + "/tweet";
 
 var logger = new Logger("tweet_micro.log");
 
@@ -21,15 +22,13 @@ amqp.connect(amqp_url, function(connection_err, connection){
     logger.error("Failed to connect rabbitmq.", connection_err);
     return;
   }
-
   logger.info("Connected to rabbitmq");
 
   connection.createChannel(function(channel_err, channel){
     if(channel_err){ 
       logger.error("Failed to create channel",channel_err);
       return;
-    }
-    
+    } 
     logger.info("Created channel...");
     
     var exchange = 'tweet';
@@ -41,6 +40,8 @@ amqp.connect(amqp_url, function(connection_err, connection){
         logger.error("Assert add queue failed. ", add_err);
         return;
       }
+      logger.info("Assert add queue success");
+
       channel.bindQueue(add_queue.queue, exchange ,'add_tweet');
       channel.consume(add_queue.queue,function(msg){
         var payload_str = msg.content.toString();
@@ -61,9 +62,10 @@ amqp.connect(amqp_url, function(connection_err, connection){
         logger.error("Assert search queue failed. ", search_err);
         return;
       }
+      logger.info("Assert search queue success");
+
       channel.bindQueue(search_queue.queue, exchange, 'search_tweet');
       channel.consume(search_queue.queue, function(msg){
-        //result is the return item
         var payload_str = msg.content.toString();
         var payload = JSON.parse(payload_str);
         search_item(payload.id, {"ts" : payload.ts, "limit" : payload.limit}, function(err, result){
@@ -71,11 +73,11 @@ amqp.connect(amqp_url, function(connection_err, connection){
             logger.error("Failed to search for: " + payload_str, err);
             return;
           }
+          result = JSON.stringify(result);
+          console.log(result);
           logger.info("Item search: " + payload_str 
-                      + " RESULT:" + result.toString());
-          console.log(msg.properties.replyTo);
-          console.log(msg.properties.correlationId);
-          channel.sendToQueue(msg.properties.replyTo, Buffer.from(result.toString()), {correlationId: msg.properties.correlationId});
+                      + " RESULT:" + result);
+          channel.sendToQueue(msg.properties.replyTo, Buffer.from(result), {correlationId: msg.properties.correlationId});
           channel.ack(msg)
         });
       });
@@ -104,7 +106,7 @@ function search_item(id, options, callback){
     var query = {'id': id};
     mongodb.search("tweet", query, 1 , {}, function(err, result){
       if(err) return callback(err, null);
-      return callback(null, result);
+      return callback(null, result[0]);
     });
   }
 }
