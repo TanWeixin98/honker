@@ -13,6 +13,8 @@ app.use(cookieParser('TeamLiquid :('));
 const messenger = require( './clientMessenger' );
 messenger.createClient();
 
+const cookies = require( './cookies' );
+
 app.post('/addUser', (req, res) => {
     messenger.sendRPCMessage(JSON.stringify(req.body), 'addUser')
         .then((response) => res.json(response));
@@ -29,6 +31,7 @@ app.post('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-    messenger.sendRPCMessage(JSON.stringify(req.body), 'logout')
+    var email =  cookies.clearAuthToken(req, res);
+    messenger.sendRPCMessage(JSON.stringify({email: email}), 'logout')
         .then((response) => res.json(response));
 });
