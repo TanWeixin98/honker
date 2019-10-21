@@ -7,9 +7,19 @@ module.exports = {
     app.use(body_parser.json());
   },
 
-  add_item_check: function(req){
+  verify : function(req, res, cookie){
+    if(req.cookies['authToken'] == null || cookie.readAuthToken(req.cookies['authToken']) == null){
+      res.statusCode = 500;
+      res.json({"status":"error", "error":"Not log in"});
+      return false;
+    }
+    return true;
+  },
+
+  add_item_check: function(req, username){
     var content = req.content;
     var childType = req.childType;
+    console.log(req)
     var validType = ["retweet", "reply"];
     if(childType != null && validType.indexOf(childType) == -1){
       return {"status":"error", "error":"Invalid childType"};
@@ -18,14 +28,28 @@ module.exports = {
     }
     var id = random_key.generate(10);
     req['id'] = id;
+    req['username'] = username;
+    req['property'] = {"likes" : 0};
+    req['retweeted'] = 0;
+    req['timestamp'] = Date.now();
     return req;
   },
 
-  search_item_check: function(req, method){
-    if(method =="get"){
-    
-    }else{
-    
+  search_item_check: function(req){
+    var ts = req.timestamp;
+    var limit = req.limit;
+    console.log(req)
+    if(limit == undefined){
+      limit = 25;
     }
+    if(ts === undefined){
+      ts = Date.now();
+    }
+    if(!Number.isInteger(ts) || !Number.isInteger(limit)){
+      return {"status":"error" , "error":"Either ts or limit is not type int."};
+    }else if(limit < 1 || limit > 100){
+      return {"status":"error", "error":"limit is either less than 1 or greater than 100."}
+    }
+    return {"timestamp":ts , "limit":limit};
   }
 }
