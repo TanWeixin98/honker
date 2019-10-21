@@ -111,6 +111,7 @@ function search_item(id, options, callback){
   if(id === undefined){
     var query = {'timestamp': {$lte: options.timestamp}};
     mongodb.search("tweet", query, options.limit, {'timestamp': -1},function(err, result){
+      if(err.message == "No matches") return callback(null, []);
       if(err) return callback(err, null);
       return callback(null, result);
     });
