@@ -8,7 +8,8 @@ module.exports = {
   },
 
   verify : function(req, res, cookie){
-    if(req.cookies['authToken'] == null || cookie.readAuthToken(req.cookies['authToken']) == null){
+    var authToken = req.cookies['authToken'];
+    if(authToken == null || cookie.readAuthToken(authToken) == null){
       res.statusCode = 500;
       res.json({"status":"error", "error":"Not log in"});
       return false;
@@ -19,7 +20,6 @@ module.exports = {
   add_item_check: function(req, username){
     var content = req.content;
     var childType = req.childType;
-    console.log(req)
     var validType = ["retweet", "reply"];
     if(childType != null && validType.indexOf(childType) == -1){
       return {"status":"error", "error":"Invalid childType"};
@@ -38,8 +38,7 @@ module.exports = {
   search_item_check: function(req){
     var ts = req.timestamp;
     var limit = req.limit;
-    console.log(req)
-    if(limit == undefined){
+    if(limit === undefined){
       limit = 25;
     }
     if(ts === undefined){
