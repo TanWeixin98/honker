@@ -110,7 +110,6 @@ function del_item(){}
 function search_item(id, options, callback){
   if(id === undefined){
     var query = {'timestamp': {$lte: options.timestamp}};
-    console.log(options);
     mongodb.search("tweet", query, options.limit, {'timestamp': -1},function(err, result){
       if(err) return callback(err, null);
       return callback(null, result);
