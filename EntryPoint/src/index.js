@@ -31,14 +31,14 @@ app.post('/login', (req, res) => {
     messenger.sendRPCMessage(JSON.stringify(req.body), 'login')
         .then((response) => {
             if(response.status == 'OK')
-                res.cookie('authToken', cookies.createAuthToken(req.body.username), { signed: true });
+                res.cookie('authToken', cookies.createAuthToken(req.body.email), { signed: true });
             res.json(response);
         });
 });
 
 app.post('/logout', (req, res) => {
-    var username =  cookies.clearAuthToken(req, res);
-    messenger.sendRPCMessage(JSON.stringify({username: username}), 'logout')
+    var email =  cookies.clearAuthToken(req, res);
+    messenger.sendRPCMessage(JSON.stringify({email: email}), 'logout')
         .then((response) => res.json(response));
 });
 
@@ -46,14 +46,13 @@ app.post('/logout', (req, res) => {
 app.post('/additem', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     if(!request_filter.verify(req,res,cookies)) return
-    var username = cookies.readAuthToken(req.cookies['username']);
+    var username = "test";
     var json = request_filter.add_item_check(req.body, username);
     if(json.status == "error"){
       res.statusCode = 500;
       res.json(json);
       return;
     }
-    json['username'] = username;
     messenger.sendRPCMessage(JSON.stringify(json), undefined, "add_item")
         .then((response) => res.json(response));
 });
