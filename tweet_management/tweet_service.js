@@ -53,7 +53,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
             res = {"status" : "error", "error":"failed to add tweet."};
           }else{
             logger.info("Item added: " + payload_str);
-            res = {"status" : "OK", "id" : payload.id};
+            res = {"status" : "ok", "id" : payload.id};
           }
          
           res = JSON.stringify(res);
@@ -83,7 +83,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
           }else{
             logger.info("Item search: " + payload_str 
                         + " RESULT:" + result);
-            res = {"status" : "OK"}
+            res = {"status" : "ok"}
             if(Array.isArray(result)) res['items'] = result;
             else res['item'] = result;
           }
