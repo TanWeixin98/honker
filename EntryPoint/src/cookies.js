@@ -5,16 +5,16 @@ module.exports = {
     clearAuthToken: (req, res) => {
         var authToken = req.signedCookies.authToken;
         res.clearCookie('authToken', { signed: true });
-        return authToken ? cookie.parse(authToken).email : null;
+        return authToken ? cookie.parse(authToken).username : null;
     },
 
     readAuthToken: (cookies) => {
         var authToken = cookies.authToken;
-        return authToken ? cookie.parse(authToken).email : null;
+        return authToken ? cookie.parse(authToken).username : null;
     },
 
-    createAuthToken: (email) => {
-        return cookie.serialize('email', email);
+    createAuthToken: (username) => {
+        return cookie.serialize('username', username);
     }
 
 }
