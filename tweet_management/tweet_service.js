@@ -47,20 +47,13 @@ amqp.connect(amqp_url, function(connection_err, connection){
         var payload_str = msg.content.toString();
         var payload = JSON.parse(payload_str);
         add_item(payload, function(err){
-          var res = {};
           if(err){
             logger.error("Failed to add: " + payload_str ,err);
-            res = {"status" : "error", "error":"failed to add tweet."};
-          }else{
-            logger.info("Item added: " + payload_str);
-            res = {"status" : "ok", "id" : payload.id};
+            return;
           }
-         
-          res = JSON.stringify(res);
-          channel.sendToQueue(msg.properties.replyTo, Buffer.from(res), {correlationId: msg.properties.correlationId});
-          channel.ack(msg);
+          logger.info("Item added: " + payload_str);
         }) 
-      });
+      }, {noAck: true});
     });
 
     //search
@@ -75,21 +68,16 @@ amqp.connect(amqp_url, function(connection_err, connection){
       channel.consume(search_queue.queue, function(msg){
         var payload_str = msg.content.toString();
         var payload = JSON.parse(payload_str);
-        search_item(payload.id, {"timestamp" : payload.timestamp, "limit" : payload.limit}, function(err, result){
-          var res = {};
+        search_item(payload.id, {"ts" : payload.ts, "limit" : payload.limit}, function(err, result){
           if(err){
             logger.error("Failed to search for: " + payload_str, err);
-            res = {"status":"error", "error":"failed to search tweet"};
-          }else{
-            logger.info("Item search: " + payload_str 
-                        + " RESULT:" + result);
-            res = {"status" : "ok"}
-            if(Array.isArray(result)) res['items'] = result;
-            else res['item'] = result;
+            return;
           }
-          
-          res = JSON.stringify(res);
-          channel.sendToQueue(msg.properties.replyTo, Buffer.from(res), {correlationId: msg.properties.correlationId});
+          result = JSON.stringify(result);
+          console.log(result);
+          logger.info("Item search: " + payload_str 
+                      + " RESULT:" + result);
+          channel.sendToQueue(msg.properties.replyTo, Buffer.from(result), {correlationId: msg.properties.correlationId});
           channel.ack(msg)
         });
       });
@@ -108,10 +96,9 @@ function add_item(payload, callback){
 function del_item(){}
 
 function search_item(id, options, callback){
-  if(id === undefined){
-    var query = {'timestamp': {$lte: options.timestamp}};
-    console.log(options);
-    mongodb.search("tweet", query, options.limit, {'timestamp': -1},function(err, result){
+  if(id === ""){
+    var query = {'ts': {$lte: options.ts}};
+    mongodb.search("tweet", query, options.limit, {'ts': -1},function(err, result){
       if(err) return callback(err, null);
       return callback(null, result);
     });
