@@ -14,22 +14,21 @@ const messenger = require( './clientMessenger' );
 messenger.createClient();
 
 const cookies = require( './cookies' );
-const utils = require('./utils')
-const request_checker = require('./request_checker.js');
-request_checker.init(app);
+const request_filter = require('./request_process.js');
+request_filter.init(app);
 
 app.post('/addUser', (req, res) => {
-    messenger.sendRPCMessage(JSON.stringify(req.body), 'addUser', 'UserAuth')
+    messenger.sendRPCMessage(JSON.stringify(req.body), 'addUser')
         .then((response) => res.json(response));
 });
 
 app.post('/verify', (req, res) => {
-    messenger.sendRPCMessage(JSON.stringify(req.body), 'verify', 'UserAuth')
+    messenger.sendRPCMessage(JSON.stringify(req.body), 'verify')
         .then((response) => res.json(response));
 });
 
 app.post('/login', (req, res) => {
-    messenger.sendRPCMessage(JSON.stringify(req.body), 'login', 'UserAuth')
+    messenger.sendRPCMessage(JSON.stringify(req.body), 'login')
         .then((response) => {
             if(response.status == 'OK')
                 res.cookie('authToken', cookies.createAuthToken(req.body.username), { signed: true });
@@ -39,37 +38,43 @@ app.post('/login', (req, res) => {
 
 app.post('/logout', (req, res) => {
     var username =  cookies.clearAuthToken(req, res);
-    messenger.sendRPCMessage(JSON.stringify({username: username}), 'logout', 'UserAuth')
+    messenger.sendRPCMessage(JSON.stringify({username: username}), 'logout')
         .then((response) => res.json(response));
 });
 
 //tweet
 app.post('/additem', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    if(!request_checker.verify(req,res,cookies)) return
+    if(!request_filter.verify(req,res,cookies)) return
     var username = cookies.readAuthToken(req.cookies['username']);
-    
-    var json = request_checker.add_item_check(req.body, username);
-    if(utils.send_response(res, json) == true) return;
+    var json = request_filter.add_item_check(req.body, username);
+    if(json.status == "error"){
+      res.statusCode = 500;
+      res.json(json);
+      return;
+    }
     json['username'] = username;
-
-    messenger.sendRPCMessage(JSON.stringify(json), "", "add_item")
+    messenger.sendRPCMessage(JSON.stringify(json), undefined, "add_item")
         .then((response) => res.json(response));
 });
 
 app.post('/search', (req,res) => {
     res.setHeader('Content-Type', 'application/json');
-    var json = request_checker.search_item_check(req.body);
-    if(utils.send_response(res, json) == true) return;
-
-    messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
-        .then((response) => utils.send_response(res, response));
+    if(!request_filter.verify(req,res,cookies)) return
+    var json = request_filter.search_item_check(req.body);
+    if(json.status == "error"){
+      res.statusCode = 500;
+      res.json(json);
+      return;
+    }
+    messenger.sendRPCMessage(JSON.stringify(json), undefined, "search_item")
+        .then((response) => res.json(response));
 });
 
 app.get('/item/:id', (req, res, next) => {
   res.setHeader('Content-Type', 'application/json');
+  if(!request_filter.verify(req,res,cookies)) return
   var id = req.params.id;
-
-  messenger.sendRPCMessage(JSON.stringify({"id" : id }), "", "search_item")
-        .then((response) => utils.send_response(res, response));
+  messenger.sendRPCMessage(JSON.stringify({"id" : id }), undefined, "search_item")
+        .then((response) => res.json(response));
 });
