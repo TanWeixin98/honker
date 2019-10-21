@@ -44,7 +44,7 @@ module.exports = {
     if(ts === undefined){
       ts = Date.now();
     }
-    if(!Number.isInteger(ts) || !Number.isInteger(limit)){
+    if(!Number.isFinite(ts) || !Number.isInteger(limit)){
       return {"status":"error" , "error":"Either ts or limit is not type int."};
     }else if(limit < 1 || limit > 100){
       return {"status":"error", "error":"limit is either less than 1 or greater than 100."}
