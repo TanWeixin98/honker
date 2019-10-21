@@ -44,36 +44,18 @@ app.post('/logout', (req, res) => {
 
 //tweet
 app.post('/additem', (req, res) => {
+    var json = request_filter.add_item_check(req.body);
     res.setHeader('Content-Type', 'application/json');
-    if(!request_filter.verify(req,res,cookies)) return
-    var username = "test";
-    var json = request_filter.add_item_check(req.body, username);
-    if(json.status == "error"){
+    if('error' in json){
       res.statusCode = 500;
       res.json(json);
-      return;
     }
-    messenger.sendRPCMessage(JSON.stringify(json), undefined, "add_item")
-        .then((response) => res.json(response));
 });
 
 app.post('/search', (req,res) => {
-    res.setHeader('Content-Type', 'application/json');
-    if(!request_filter.verify(req,res,cookies)) return
-    var json = request_filter.search_item_check(req.body);
-    if(json.status == "error"){
-      res.statusCode = 500;
-      res.json(json);
-      return;
-    }
-    messenger.sendRPCMessage(JSON.stringify(json), undefined, "search_item")
-        .then((response) => res.json(response));
+
 });
 
-app.get('/item/:id', (req, res, next) => {
-  res.setHeader('Content-Type', 'application/json');
-  if(!request_filter.verify(req,res,cookies)) return
-  var id = req.params.id;
-  messenger.sendRPCMessage(JSON.stringify({"id" : id }), undefined, "search_item")
-        .then((response) => res.json(response));
+app.get('/item', (req, res) => {
+  console.log(req);
 });

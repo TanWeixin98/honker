@@ -9,7 +9,7 @@ var _channel;
 
 module.exports = {
 
-    sendRPCMessage :  (message, endpoint="", RPC_QUEUE="UserAuth") => {
+    sendRPCMessage :  (message, endpoint) => {
         return new Promise((resolve) => {
             const correlationId = uuidv4();
             // listen for the content emitted on the correlationId event
