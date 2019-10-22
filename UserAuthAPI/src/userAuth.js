@@ -6,8 +6,8 @@ module.exports = {
 
     addUser: (req) => {
         return new Promise((resolve, reject) => {
-            if(!req.email || !req.displayName){
-                resolve({ msg: 'An email and display name are required for registration.' });
+            if(!req.email || !req.username){
+                resolve({ msg: 'An email and username are required for registration.' });
                 console.log(JSON.stringify(req) + ' => Empty fields');
                 return;
             }
@@ -18,7 +18,7 @@ module.exports = {
                         if(user.email == req.email)
                             msg = 'An account has already been created with this email.';
                         else
-                            msg =  'This display name is already in use.';
+                            msg =  'This username is already in use.';
                         console.log(JSON.stringify(req) + ' ' + msg);
                         resolve({ status: 'error', error: msg });
                         return;
@@ -28,7 +28,7 @@ module.exports = {
                         email: req.email,
                         password: req.password,
                         verificationKey: verificationKey,
-                        displayName: req.displayName
+                        username: req.username
                     };
                     db.insertOne(user)
                         .then((acknowledged) => {
@@ -47,7 +47,7 @@ module.exports = {
 
     verifyUser: (req) => {
         return new Promise((resolve, reject) => {
-            db.findOne({ 'email' : req.email })
+            db.findOne({ email : req.email })
                 .then((user) => {
                     if(user == null){
                         resolve({ statis: 'error', error: 'You have not signed up yet' });
@@ -73,25 +73,31 @@ module.exports = {
 
     loginUser: (req) => {
         return new Promise((resolve, reject) => {
-            var email = req.email;
+            var username = req.username;
             var password = req.password;
-            db.findOne({ 'email': email, 'password': password })
+            if(!username) resolve({ status: 'error', error: 'No username provided' });
+            db.findOne({ 
+                $and: [
+                    { username: req.username }, 
+                    { password: req.password }
+                ]})
                 .then((user) => {
+                    console.log(user)
                     if(!user){
-                        console.log('Invalid login for %s %s', email, password);
-                        resolve({ status: 'error', error: 'The email or password provided is incorrect.' });
+                        console.log('Invalid login for %s %s', username, password);
+                        resolve({ status: 'error', error: 'The username or password provided is incorrect.' });
                     }
                     else if(user.verificationKey){
-                        console.log(email + ' tried to login but was unverified.');
+                        console.log(username + ' tried to login but was unverified.');
                         resolve({ status: 'error', error: 'This account is still unverified. Check your email.' });
                     }
                     else{
-                        console.log(email + ' logged in');
+                        console.log(username + ' logged in');
                         let options = {
                             maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
                             signed: true
                         }
-                        resolve({ status: 'OK' });
+                        resolve({ status: 'OK' , msg: 'You are logged in' });
                         // Redirect to home page
                     }
                 });
@@ -100,9 +106,8 @@ module.exports = {
 
     logoutUser: (req) => {
         return new Promise((resolve, reject) => {
-            var email = req.email;
-            if(!email){
-                console.log('EMAIL:' , email);
+            var username = req.username;
+            if(!username){
                 resolve({ status: 'error', error: 'Failed to log out. Please log in again.' });
                 console.log('A user tried to log out with a null or modified cookie');
                 return;
@@ -118,6 +123,6 @@ function isUniqueUser(params){
     return db.findOne({ 
         $or: [
             { email: params.email },
-            { displayName: params.displayName }
+            { username: params.username }
         ]});
 }

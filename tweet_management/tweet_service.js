@@ -3,7 +3,7 @@ const amqp = require('amqplib/callback_api');
 const Logger = require('./utils/logger.js');
 const mongodb = require('./utils/mongodb.js');
 
-const mongo_ip = "192.168.122.12:27017";
+const mongo_ip = "localhost";
 const amqp_url = "amqp://localhost";
 const mongo_url = "mongodb://" + mongo_ip + "/tweet";
 
@@ -109,8 +109,9 @@ function del_item(){}
 
 function search_item(id, options, callback){
   if(id === undefined){
-    var query = {'timestamp': {$lte: options.timestamp}};
+    var query = {timestamp: {$lte: options.timestamp}};
     mongodb.search("tweet", query, options.limit, {'timestamp': -1},function(err, result){
+      if(err && err.message == "No matches") return callback(null, []);
       if(err) return callback(err, null);
       return callback(null, result);
     });

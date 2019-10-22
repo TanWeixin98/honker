@@ -46,9 +46,9 @@ app.post('/logout', (req, res) => {
 //tweet
 app.post('/additem', (req, res) => {
     res.setHeader('Content-Type', 'application/json');
-    if(!request_checker.verify(req,res,cookies)) return
-    var username = cookies.readAuthToken(req.cookies['username']);
-    
+    var username = cookies.readAuthToken(req.signedCookies);
+    if(!request_checker.verify(username,res)) return;
+
     var json = request_checker.add_item_check(req.body, username);
     if(utils.send_response(res, json) == true) return;
     json['username'] = username;
@@ -67,9 +67,9 @@ app.post('/search', (req,res) => {
 });
 
 app.get('/item/:id', (req, res, next) => {
-  res.setHeader('Content-Type', 'application/json');
-  var id = req.params.id;
+    res.setHeader('Content-Type', 'application/json');
+    var id = req.params.id;
 
-  messenger.sendRPCMessage(JSON.stringify({"id" : id }), "", "search_item")
+    messenger.sendRPCMessage(JSON.stringify({"id" : id }), "", "search_item")
         .then((response) => utils.send_response(res, response));
 });

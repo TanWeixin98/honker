@@ -1,5 +1,5 @@
 const body_parser = require('body-parser');
-const random_key = require('random-key');
+const uuidv4 = require('uuid/v4');
 
 module.exports = {
   init : function(app){
@@ -7,9 +7,8 @@ module.exports = {
     app.use(body_parser.json());
   },
 
-  verify : function(req, res, cookie){
-    var authToken = req.cookies['authToken'];
-    if(authToken == null || cookie.readAuthToken(authToken) == null){
+  verify : function(username, res){
+    if(!username){
       res.statusCode = 500;
       res.json({"status":"error", "error":"Not log in"});
       return false;
@@ -26,12 +25,12 @@ module.exports = {
     }else if(content === undefined){
       return {"status": "error", "error":"No content"};
     }
-    var id = random_key.generate(10);
+    var id = uuidv4();
     req['id'] = id;
     req['username'] = username;
     req['property'] = {"likes" : 0};
     req['retweeted'] = 0;
-    req['timestamp'] = Date.now();
+    req['timestamp'] = Math.round((new Date()).getTime() / 1000);
     return req;
   },
 
@@ -44,7 +43,7 @@ module.exports = {
     if(ts === undefined){
       ts = Date.now();
     }
-    if(!Number.isInteger(ts) || !Number.isInteger(limit)){
+    if(!Number.isFinite(ts) || !Number.isInteger(limit)){
       return {"status":"error" , "error":"Either ts or limit is not type int."};
     }else if(limit < 1 || limit > 100){
       return {"status":"error", "error":"limit is either less than 1 or greater than 100."}
