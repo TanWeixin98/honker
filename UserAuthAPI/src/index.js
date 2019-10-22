@@ -10,7 +10,7 @@ dbUtils.connectToServer((err, client) => {
     else{
         userAuth = require('./userAuth');
     }
-});
+}, 'UserAuth');
 
 const amqp = require('amqplib');
 const RABBITMQ = 'amqp://localhost'
