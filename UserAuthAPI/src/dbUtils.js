@@ -4,12 +4,13 @@ const mongoURL = 'mongodb://localhost:27017/';
 var _db;
 
 module.exports = {
-    connectToServer: function(callback){
+
+    connectToServer: function(callback, database){
         MongoClient.connect(mongoURL,
             { useNewUrlParser: true,
               useUnifiedTopology: true },
             function(err, db){
-            _db = db.db("Honker");
+            _db = db.db(database);
             return callback(err);
         });
     },
