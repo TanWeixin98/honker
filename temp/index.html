@@ -62,7 +62,25 @@
                     if (textStatus)
                         alert(textStatus);
                 });
-                return false;});
+                return false;
+            });
+            $('#additem').submit((e) => {
+                e.preventDefault();
+                var content = $('#content').val();
+                var childType = $('#childType').val();
+                var json = {content: content};
+                if(childType) json[childType] = childType;
+                $.ajax({
+                    type: "POST",
+                    url: "/addItem",
+                    contentType: "application/json",
+                    data: JSON.stringify(json)
+                }).fail((jqXHR, textStatus) => {
+                    if (textStatus)
+                        alert(textStatus);
+                });
+                return false;
+            });
         });
     </script>
 </head>
@@ -105,10 +123,10 @@
     </form>
     <br>
     <b>Add Item</b>
-    <form action="/additem" method="post" class="stay">
-        Content: <input type="text" name="content">
+    <form id="additem" method="post">
+        Content: <input type="text" id="content">
         <br>
-        Child Type: <input type="text" name="childType">
+        Child Type: <input type="text" id="childType">
         <br>
         <input type="submit" value="Add"/>
     </form>
