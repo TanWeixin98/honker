@@ -75,6 +75,9 @@
                     url: "/addItem",
                     contentType: "application/json",
                     data: JSON.stringify(json)
+                }).done(function(res){
+                        if(res.status == 'OK')
+                          alert(res.id)
                 }).fail((jqXHR, textStatus) => {
                     if (textStatus)
                         alert(textStatus);
