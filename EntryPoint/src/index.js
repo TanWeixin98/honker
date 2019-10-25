@@ -18,6 +18,8 @@ const utils = require('./utils')
 const request_checker = require('./request_checker.js');
 request_checker.init(app);
 
+app.get('/', (req, res) => {res.sendFile(require('path').resolve(__dirname, '../../temp/index.html'))});
+
 app.post('/addUser', (req, res) => {
     messenger.sendRPCMessage(JSON.stringify(req.body), 'addUser', 'UserAuth')
         .then((response) => res.json(response));
@@ -58,6 +60,7 @@ app.post('/additem', (req, res) => {
 });
 
 app.post('/search', (req,res) => {
+    console.log(req.body);
     res.setHeader('Content-Type', 'application/json');
     var json = request_checker.search_item_check(req.body);
     if(utils.send_response(res, json) == true) return;

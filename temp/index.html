@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            var $form = $('.stay');
+            $form.submit(function(){
+                $.post($(this).attr('action'), $(this).serialize(), function(response){
+                    if(response.msg)
+                        alert(response.msg);
+                    else if (response.error)
+                        alert(response.error);
+                },'json');
+                return false;
+            });
+            $('#play').submit(function(e){
+                e.preventDefault();
+                $.get('./ttt', function(data){
+                    if(data.msg) alert(data.msg)
+                    else
+                        window.location.href = './ttt';
+                });
+            });
+            $('#search').submit(function(e){
+                var limit = $('#limit').val();
+                var ts = $('#timestamp').val();
+                var limitJSON = limit ? '"limit":' + limit : '';
+                var tsJSON = ts ? '"timestamp":' + ts : '';
+                var comma = limitJSON && tsJSON ? ',' : '';
+                var jsonStr = '{' + limitJSON + comma + tsJSON + '}';
+                console.log(jsonStr);
+                $.ajax({
+                    type: "POST",
+                    url: "/search", 
+                    contentType: "application/json",
+                    data: jsonStr
+                }).done(function(resp){
+                    if(resp){
+                        $('#list').empty();
+                        $.each(resp.items, function(i, item){
+                            $('#list').append('<li>'+"username:"+item.username+"</ul> <ul><li>  content:"+item.content+'</li></ul>');
+                        });
+                    }
+                }).fail(function(jqXHR, textStatus){
+                    if (textStatus)
+                        alert(textStatus);
+                });
+                return false;
+            });
+            $('#itemFind').submit(function(e){
+                e.preventDefault();
+                var id = $('#itemId').val();
+                $.ajax({
+                    type: "GET",
+                    url: "/item/" + id,
+                }).done(function(resp){
+                    if(resp){
+                        $('#list').empty();
+                        $('#list').append('<li>'+"username:"+resp.item.username+"</ul> <ul><li> content:"+resp.item.content+'</li></ul>');
+                    }
+                }).fail(function(jqXHR, textStatus){
+                    if (textStatus)
+                        alert(textStatus);
+                });
+                return false;
+            });
+            $('#additem').submit((e) => {
+                e.preventDefault();
+                var content = $('#content').val();
+                var childType = $('#childType').val();
+                var json = {content: content};
+                if(childType) json[childType] = childType;
+                $.ajax({
+                    type: "POST",
+                    url: "/addItem",
+                    contentType: "application/json",
+                    data: JSON.stringify(json)
+                }).fail((jqXHR, textStatus) => {
+                    if (textStatus)
+                        alert(textStatus);
+                });
+                return false;
+            });
+        });
+    </script>
+</head>
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+
+<body>
+    <b>Login</b>
+    <form action="/login" method="post" class="stay">
+        Username: <input type="text" name="username" required>
+        <br>
+        Password: <input type="password" name="password">
+        <br>
+        <input type="submit" value="Sign in">
+    </form>
+    <br>
+    <b>Add User</b>
+    <form action="/adduser" method="post" class="stay">
+        Username: <input type="text" name="username" required>
+        <br>
+        Password: <input type="password" name="password">
+        <br>
+        Email: <input type="email" name="email" required>
+        <br>
+        <input type="submit" value="Register">
+    </form>
+    <br>
+    <b>Verify</b>
+    <form action="/verify" method="post" class="stay">
+        Email: <input type="email" name="email" required>
+        <br>
+        Key: <input type="text" name="key" required>
+        <br>
+        <input type="submit" value="Verify">
+    </form>
+    <br>
+    <b>Logout</b>
+    <form action="/logout" method="post" action="/" class="stay">
+        <input type="submit" value="Logout">
+    </form>
+    <br>
+    <b>Add Item</b>
+    <form id="additem" method="post">
+        Content: <input type="text" id="content">
+        <br>
+        Child Type: <input type="text" id="childType">
+        <br>
+        <input type="submit" value="Add"/>
+    </form>
+    <br>
+    <b>Find Item</b>
+    <form id="itemFind">
+        Id: <input type="text" id="itemId">
+        <br>
+        <input type="submit" value="Find"/>
+    </form>
+    <br>
+    <b>Search Item</b>
+    <form id="search" >
+        Timestamp: <input type="text" id="timestamp">
+        <br>
+        Limit: <input type="number" id="limit">
+        <br>
+        <input type="submit" value="Search"/>
+    </form>
+        <ul id="list"/>
+</body>
