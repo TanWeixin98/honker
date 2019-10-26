@@ -2,14 +2,13 @@ var amqp = require('amqplib');
 var EventEmitter = require('events');
 var uuidv4 = require('uuid/v4');
 
-const RPC_QUEUE = 'UserAuth';
 const REPLY_QUEUE = 'amq.rabbitmq.reply-to';
 const RABBITMQ_URL = 'amqp://localhost';
 var _channel;
 
 module.exports = {
 
-    sendRPCMessage :  (message, endpoint) => {
+    sendRPCMessage :  (message, endpoint, RPC_QUEUE) => {
         return new Promise((resolve) => {
             const correlationId = uuidv4();
             // listen for the content emitted on the correlationId event
