@@ -7,7 +7,7 @@ module.exports = {
     addUser: (req) => {
         return new Promise((resolve, reject) => {
             if(!req.email || !req.username){
-                resolve({ msg: 'An email and username are required for registration.' });
+                resolve({ status: 'error', error: 'An email and username are required for registration.' });
                 console.log(JSON.stringify(req) + ' => Empty fields');
                 return;
             }
@@ -50,7 +50,7 @@ module.exports = {
             db.findOne({ email : req.email })
                 .then((user) => {
                     if(user == null){
-                        resolve({ statis: 'error', error: 'You have not signed up yet' });
+                        resolve({ status: 'error', error: 'You have not signed up yet' });
                         console.error(req.email + ' tried to verify but no account exists for that email.');
                         return;
                     }
