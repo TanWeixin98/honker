@@ -1,16 +1,14 @@
-var cookieParser = require('cookie-parser');
-var path = require('path');
-
-console.log('Listening on port 8080');
-
 var userAuth;
-var dbUtils = require( './dbUtils' );
-dbUtils.connectToServer((err, client) => {
-    if(err) console.log(err);
-    else{
-        userAuth = require('./userAuth');
-    }
-}, 'UserAuth');
+require( './dbUtils' )
+    .connectToServer(
+        'mongodb://localhost:27017/',
+        'UserAuth',
+        (err) => {
+            if(err) console.log(err);
+            else
+                userAuth = require('./userAuth')
+        }
+    );
 
 const amqp = require('amqplib');
 const RABBITMQ = 'amqp://localhost'
@@ -33,24 +31,23 @@ open
                     var func;
                     switch(msg.properties.type){
                         case 'addUser':
-                            func = userAuth.addUser(parsedMsg);
+                            func = userAuth.addUser;
                             break;
                         case 'verify':
-                            func = userAuth.verifyUser(parsedMsg);
+                            func = userAuth.verifyUser;
                             break;
                         case 'login':
-                            func = userAuth.loginUser(parsedMsg);
+                            func = userAuth.loginUser;
                             break;
                         case 'logout':
-                            func = userAuth.logoutUser(parsedMsg);
+                            func = userAuth.logoutUser;
                             break;
                         default:
                             console.log('Unknown request type: ', msg.properties.type);
-                            channel.ack(msg);
                     }
 
                     if(func) {
-                        func.then((response) => {
+                        func(parsedMsg).then((response) => {
                             var respString = JSON.stringify(response);
                             console.log('Message sent: ', respString);
 
@@ -61,9 +58,10 @@ open
                                     correlationId: msg.properties.correlationId,
                                 }
                             );
-                            channel.ack(msg);
                         })
                     }
+
+                    channel.ack(msg);
                 }
             });
         });
