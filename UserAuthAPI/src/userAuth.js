@@ -1,6 +1,5 @@
 const emailer = require( './email' );
-let  dbUtils = require( './dbUtils' );
-const db = dbUtils.getDB().collection('Users');
+const db = require('./dbUtils').getDB().collection('Users');
 
 module.exports = {
 

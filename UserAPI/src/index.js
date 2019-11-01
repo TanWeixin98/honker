@@ -1,20 +1,20 @@
-var userAuth;
+var users;
+
 require( './dbUtils' )
     .connectToServer(
         'mongodb://localhost:27017/',
-        'UserAuth',
+        'Users',
         (err) => {
             if(err) console.log(err);
             else
-                userAuth = require('./userAuth')
-        }
-    );
+                users = require('./users');
+        });
 
 const amqp = require('amqplib');
 const RABBITMQ = 'amqp://localhost'
 
 const open = amqp.connect(RABBITMQ);
-const q = 'UserAuth';
+const q = 'UserAPI';
 
 open
     .then((conn) => {
@@ -30,17 +30,18 @@ open
 
                     var func;
                     switch(msg.properties.type){
-                        case 'addUser':
-                            func = userAuth.addUser;
+                        case 'addUser': // To add a user that just signed up into the this database
+                            func = users.addUser;
                             break;
-                        case 'verify':
-                            func = userAuth.verifyUser;
+                        case 'followUser':
                             break;
-                        case 'login':
-                            func = userAuth.loginUser;
+                        case 'getUser':
                             break;
-                        case 'logout':
-                            func = userAuth.logoutUser;
+                        case 'getUserPosts':
+                            break;
+                        case 'getUserFollowers':
+                            break;
+                        case 'getUserFollowings':
                             break;
                         default:
                             console.log('Unknown request type: ', msg.properties.type);
@@ -60,8 +61,9 @@ open
                                         correlationId: msg.properties.correlationId,
                                     }
                                 );
+                                if(!response.internalError)
+                                    channel.ack(msg);
                             })
-                        channel.ack(msg);
                     }
 
                 }

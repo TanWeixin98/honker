@@ -30,9 +30,25 @@ const utils = require('./utils')
 const request_checker = require('./request_checker.js');
 request_checker.init(app);
 
+// UserAuthAPI -Brian
 app.post('/addUser', (req, res, next) => {
     messenger.sendRPCMessage(JSON.stringify(req.body), 'addUser', 'UserAuth')
-        .then((response) => res.json(response));
+        .then((UserAuthResponse) => {
+            if(UserAuthResponse.status == 'OK')
+                UserAPIResponse: messenger.sendRPCMessage(
+                    JSON.stringify({username: req.body.username, email: req.body.email}),
+                    'addUser', 'UserAPI')
+                    .then((UserAPIResponse) => {
+                        if(UserAPIResponse.status == 'OK')
+                            res.json(UserAuthResponse);
+                        else
+                            res.json({ status: 'error', error: 'Internal error. Please try signing up again.' });
+                    })
+            else{
+                res.json(UserAuthResponse);
+                return;
+            }
+        });
 });
 
 app.post('/verify', (req, res, next) => {
@@ -55,7 +71,12 @@ app.post('/logout', (req, res, next) => {
         .then((response) => res.json(response));
 });
 
-//tweet
+// UserAPI -Brian
+app.get('/user/:username', (req, res, next) => {
+    var username = req.params.username;
+});
+
+//tweet -Weixin
 app.post('/additem', (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     var username = cookies.readAuthToken(req.signedCookies);
