@@ -34,8 +34,10 @@ open
                             func = users.addUser;
                             break;
                         case 'followUser':
+                            func = users.followUser;
                             break;
                         case 'getUser':
+                            func = users.getUser;
                             break;
                         case 'getUserPosts':
                             break;

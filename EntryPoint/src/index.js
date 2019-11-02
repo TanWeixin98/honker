@@ -20,7 +20,6 @@ app.use(cors(
     }
 ));
 app.use(express.static(path.resolve(__dirname, '../../frontend/build')));
-app.get('*', (req, res) => { res.sendFile('index.html', {root: path.resolve(__dirname, '../../frontend/build')}) });
 
 const messenger = require( './clientMessenger' );
 messenger.createClient();
@@ -74,6 +73,19 @@ app.post('/logout', (req, res, next) => {
 // UserAPI -Brian
 app.get('/user/:username', (req, res, next) => {
     var username = req.params.username;
+    messenger.sendRPCMessage(JSON.stringify({username: username}), 'getUser', 'UserAPI')
+        .then((response) => res.json(response));
+});
+
+app.post('/follow', (req, res, next) => {
+    var follower = cookies.readAuthToken(req.signedCookies);
+    if(!follower){
+        res.json({ status: 'error', error: 'You must be logged in to follow.' });
+        console.log('Unable to follow a user without being logged in');
+    }
+    var toFollow = req.body.follow==null ? true : req.body.follow;
+    messenger.sendRPCMessage(JSON.stringify({ follower: follower, followee: req.body.username, toFollow: toFollow }), 'followUser', 'UserAPI')
+        .then((response) => res.json(response));
 });
 
 //tweet -Weixin
@@ -106,3 +118,5 @@ app.get('/item/:id', (req, res, next) => {
     messenger.sendRPCMessage(JSON.stringify({"id" : id }), "", "search_item")
         .then((response) => utils.send_response(res, response));
 });
+
+app.get('*', (req, res) => { res.sendFile('index.html', {root: path.resolve(__dirname, '../../frontend/build')}) });

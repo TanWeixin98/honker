@@ -1,4 +1,6 @@
-- [x] adduser
-- [x] verify
-- [x] login
-- [x] logout
+- [x] addUser
+- [x] getUser
+- [] getPosts
+- [] getFollowers
+- [] getFollowing
+- [x] follow
