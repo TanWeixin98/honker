@@ -75,7 +75,8 @@ amqp.connect(amqp_url, function(connection_err, connection){
       channel.consume(search_queue.queue, function(msg){
         var payload_str = msg.content.toString();
         var payload = JSON.parse(payload_str);
-        search_item(payload.id, {"timestamp" : payload.timestamp, "limit" : payload.limit}, function(err, result){
+
+        search_item(payload.id, {"timestamp" : payload.timestamp, "username": payload.username,"limit" : payload.limit, "projections": {}}, function(err, result){
           var res = {};
           if(err){
             logger.error("Failed to search for: " + payload_str, err);
@@ -89,6 +90,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
           }
           
           res = JSON.stringify(res);
+          console.log(res);
           channel.sendToQueue(msg.properties.replyTo, Buffer.from(res), {correlationId: msg.properties.correlationId});
           channel.ack(msg)
         });
@@ -110,14 +112,16 @@ function del_item(){}
 function search_item(id, options, callback){
   if(id === undefined){
     var query = {timestamp: {$lte: options.timestamp}};
-    mongodb.search("tweet", query, options.limit, {'timestamp': -1},function(err, result){
+    if(options.username !== undefined) query['username'] = options.username
+    console.log(options.projections)
+    mongodb.search("tweet", query, options.projections ,options.limit, {'timestamp': -1},function(err, result){
       if(err && err.message == "No matches") return callback(null, []);
       if(err) return callback(err, null);
       return callback(null, result);
     });
   }else{
     var query = {'id': id};
-    mongodb.search("tweet", query, 1 , {}, function(err, result){
+    mongodb.search("tweet", query, options.projections, 1 , {}, function(err, result){
       if(err) return callback(err, null);
       return callback(null, result[0]);
     });

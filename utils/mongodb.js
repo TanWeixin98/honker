@@ -22,8 +22,8 @@ module.exports = {
     });
   },
 
-  search : function(collection_name, query, max=1,sort_rule={}, callback){
-    mongodb.collection(collection_name).find(query).sort(sort_rule).limit(max).toArray(function(err, result){
+  search : function(collection_name, query, projections, max=1,sort_rule={}, callback){
+    mongodb.collection(collection_name).find(query, {projection:projections}).sort(sort_rule).limit(max).toArray(function(err, result){
       if(err) return callback(err, null);
       if(result.length==0) return callback(new Error("No matches"), null);
       else return callback(null, result);
