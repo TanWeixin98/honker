@@ -1,6 +1,0 @@
-- [x] addUser
-- [x] getUser
-- [ ] getPosts
-- [x] getFollowers
-- [x] getFollowing
-- [x] follow

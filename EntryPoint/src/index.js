@@ -76,16 +76,23 @@ app.get('/user/:username', (req, res, next) => {
         .then((response) => res.json(response));
 });
 
-app.get('/user/:username/followers', (req, res, next) => {
-    var limit = req.body.limit;
-    if(limit && isNaN(limit)){
-        console.log('Tried to limit the follower query with a non number: ', limit);
-        res.json({ status: 'error', error: 'Limit is not a number' });
+
+app.get('/user/:username/posts', (req, res, next) => {
+    var limit = request_checker.checkLimit(req.body.limit)
+    var currentTime = Math.round((new Date()).getTime() / 1000);
+    if(limit == null){
+        res.json({ status: 'error', error: 'The provided limit is invalid' })
         return;
     }
-    if(limit < 0 || limit > 200){
-        console.log('Limit not in range:', limit);
-        res.json({ status: 'error', error: 'Limit is out of range 0 < N < 200' });
+    messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, limit: limit, timestamp: currentTime }), '', 'search_item')
+        .then((response) => res.json(response));
+});
+
+app.get('/user/:username/followers', (req, res, next) => {
+    var limit = request_checker.checkLimit(req.body.limit)
+    var currentTime = Math.round((new Date()).getTime() / 1000);
+    if(limit == null){
+        res.json({ status: 'error', error: 'The provided limit is invalid' })
         return;
     }
     messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, limit: limit }), 'getFollowers', 'UserAPI')
@@ -93,15 +100,10 @@ app.get('/user/:username/followers', (req, res, next) => {
 });
 
 app.get('/user/:username/following', (req, res, next) => {
-    var limit = req.body.limit;
-    if(limit && isNaN(limit)){
-        console.log('Tried to limit the following query with a non number: ', limit);
-        res.json({ status: 'error', error: 'Limit is not a number' });
-        return;
-    }
-    if(limit < 0 || limit > 200){
-        console.log('Limit not in range:', limit);
-        res.json({ status: 'error', error: 'Limit is out of range 0 < N < 200' });
+    var limit = request_checker.checkLimit(req.body.limit)
+    var currentTime = Math.round((new Date()).getTime() / 1000);
+    if(limit == null){
+        res.json({ status: 'error', error: 'The provided limit is invalid' })
         return;
     }
     messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, limit: limit }), 'getFollowing', 'UserAPI')

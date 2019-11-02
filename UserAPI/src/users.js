@@ -67,10 +67,7 @@ module.exports = {
                     }
                     else{
                         var followers = user.followers;
-                        if(req.limit != null)
-                            followers = followers.slice(0, req.limit);
-                        else if(followers.length > 50)
-                            followers = followers.slice(0, 49);
+                        followers = followers.slice(0, req.limit);
                         console.log(followers);
                         resolve({ status: 'OK', users: followers });
                     }
@@ -89,10 +86,7 @@ module.exports = {
                     }
                     else{
                         var following = user.following;
-                        if(req.limit != null)
-                            following = following.slice(0, req.limit);
-                        else if(following.length > 50)
-                            following = following.slice(0, 49);
+                        following = following.slice(0, req.limit);
                         console.log(following)
                         resolve({ status: 'OK', users: following });
                     }
@@ -121,10 +115,13 @@ module.exports = {
                             var followerIndex = followee.followers.indexOf(follower.username); // Index of follower in followee's followers
                             var followeeIndex = follower.following.indexOf(followee.username); // Index of followee in follower's following
                             if(req.toFollow){
-                                if(followeeIndex == -1){
-                                    follower.followingCount += 1;
-                                    follower.following.push(followee.username);
+                                if(followeeIndex != -1){
+                                    console.log(follower.username, ' is already following ', followee.username);
+                                    resolve({ status: 'error', error: 'You\'re already following ' + followee.username });
+                                    return;
                                 }
+                                follower.followingCount += 1;
+                                follower.following.push(followee.username);
                                 if(followerIndex == -1){
                                     followee.followerCount += 1;
                                     followee.followers.push(follower.username);
@@ -132,15 +129,16 @@ module.exports = {
                                 console.log(follower.username + ' has folllowed ' + followee.username);
                             }
                             else{
-                                if(followerIndex > -1){
-                                    follower.followingCount -= 1;
-                                    if(followeeIndex > -1)
-                                        follower.following.splice(followeeIndex, 1);
+                                if(followerIndex == -1){
+                                    console.log(follower.username, ' is already not following ', followee.username);
+                                    resolve({ status: 'error', error: 'You\'re already not following ' + followee.username });
+                                    return;
                                 }
-                                if(followeeIndex > -1){
+                                follower.followingCount -= 1;
+                                if(followeeIndex != -1){
+                                    follower.following.splice(followeeIndex, 1);
                                     followee.followerCount -= 1;
-                                    if(followerIndex > -1)
-                                        followee.followers.splice(followerIndex, 1);
+                                    followee.followers.splice(followerIndex, 1);
                                 }
                                 console.log(follower.username + ' has unfollowed ' + followee.username);
                             }
