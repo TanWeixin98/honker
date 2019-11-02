@@ -56,6 +56,50 @@ module.exports = {
         });
     },
 
+    getFollowers: (req) => {
+        return new Promise((resolve, reject) => {
+            db.findOne({ username: req.username })
+                .then((user) => {
+                    if(user == null){
+                        msg = req.username + ' does not exist'
+                        resolve({ status: 'error', error: msg});
+                        console.log(msg);
+                    }
+                    else{
+                        var followers = user.followers;
+                        if(req.limit != null)
+                            followers = followers.slice(0, req.limit);
+                        else if(followers.length > 50)
+                            followers = followers.slice(0, 49);
+                        console.log(followers);
+                        resolve({ status: 'OK', users: followers });
+                    }
+                });
+        });
+    },
+
+    getFollowing: (req) => {
+        return new Promise((resolve, reject) => {
+            db.findOne({ username: req.username })
+                .then((user) => {
+                    if(user == null){
+                        msg = req.username + ' does not exist'
+                        resolve({ status: 'error', error: msg});
+                        console.log(msg);
+                    }
+                    else{
+                        var following = user.following;
+                        if(req.limit != null)
+                            following = following.slice(0, req.limit);
+                        else if(following.length > 50)
+                            following = following.slice(0, 49);
+                        console.log(following)
+                        resolve({ status: 'OK', users: following });
+                    }
+                });
+        });
+    },
+
     followUser: (req) => {
         return new Promise((resolve, reject) => {
             db.findOne({ username: req.follower })

@@ -39,11 +39,13 @@ open
                         case 'getUser':
                             func = users.getUser;
                             break;
-                        case 'getUserPosts':
+                        case 'getPosts':
                             break;
-                        case 'getUserFollowers':
+                        case 'getFollowers':
+                            func = users.getFollowers;
                             break;
-                        case 'getUserFollowings':
+                        case 'getFollowing':
+                            func = users.getFollowing;
                             break;
                         default:
                             console.log('Unknown request type: ', msg.properties.type);

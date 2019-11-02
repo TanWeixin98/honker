@@ -72,8 +72,39 @@ app.post('/logout', (req, res, next) => {
 
 // UserAPI -Brian
 app.get('/user/:username', (req, res, next) => {
-    var username = req.params.username;
-    messenger.sendRPCMessage(JSON.stringify({username: username}), 'getUser', 'UserAPI')
+    messenger.sendRPCMessage(JSON.stringify({username: req.params.username}), 'getUser', 'UserAPI')
+        .then((response) => res.json(response));
+});
+
+app.get('/user/:username/followers', (req, res, next) => {
+    var limit = req.body.limit;
+    if(limit && isNaN(limit)){
+        console.log('Tried to limit the follower query with a non number: ', limit);
+        res.json({ status: 'error', error: 'Limit is not a number' });
+        return;
+    }
+    if(limit < 0 || limit > 200){
+        console.log('Limit not in range:', limit);
+        res.json({ status: 'error', error: 'Limit is out of range 0 < N < 200' });
+        return;
+    }
+    messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, limit: limit }), 'getFollowers', 'UserAPI')
+        .then((response) => res.json(response));
+});
+
+app.get('/user/:username/following', (req, res, next) => {
+    var limit = req.body.limit;
+    if(limit && isNaN(limit)){
+        console.log('Tried to limit the following query with a non number: ', limit);
+        res.json({ status: 'error', error: 'Limit is not a number' });
+        return;
+    }
+    if(limit < 0 || limit > 200){
+        console.log('Limit not in range:', limit);
+        res.json({ status: 'error', error: 'Limit is out of range 0 < N < 200' });
+        return;
+    }
+    messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, limit: limit }), 'getFollowing', 'UserAPI')
         .then((response) => res.json(response));
 });
 
@@ -82,6 +113,7 @@ app.post('/follow', (req, res, next) => {
     if(!follower){
         res.json({ status: 'error', error: 'You must be logged in to follow.' });
         console.log('Unable to follow a user without being logged in');
+        return;
     }
     var toFollow = req.body.follow==null ? true : req.body.follow;
     messenger.sendRPCMessage(JSON.stringify({ follower: follower, followee: req.body.username, toFollow: toFollow }), 'followUser', 'UserAPI')
