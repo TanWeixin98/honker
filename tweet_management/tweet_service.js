@@ -89,7 +89,13 @@ amqp.connect(amqp_url, function(connection_err, connection){
             logger.info("Item search: " + payload_str 
                         + " RESULT:" + result);
             res = {"status" : "OK"}
-            if(Array.isArray(result)) res['items'] = result;
+            if(payload.username !== undefined){
+              res['items'] = [];
+              result.forEach(function(element) {
+                res['items'].push(element.id);
+              });
+            }
+            else if(Array.isArray(result)) res['items'] = result;
             else res['item'] = result;
           }
           
