@@ -19,6 +19,7 @@ module.exports = {
                     replyTo: REPLY_QUEUE,
                     type: endpoint // Use this to specify which endpoint so the service can figure out which function to call
                 })
+            console.log('Sent', { func: endpoint, msg: message });
         });
     },
 
