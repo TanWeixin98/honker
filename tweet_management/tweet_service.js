@@ -76,11 +76,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
         var payload_str = msg.content.toString();
         var payload = JSON.parse(payload_str);
 
-        var projections = { _id: 0}
-        if(payload.username !== undefined)
-          projections['id'] = 1;
-        
-        search_item(payload.id, {"timestamp" : payload.timestamp, "username": payload.username,"limit" : payload.limit, "projections": projections }, function(err, result){
+        search_item(payload.id, {"timestamp" : payload.timestamp, "username": payload.username,"limit" : payload.limit, "projections": {}}, function(err, result){
           var res = {};
           if(err){
             logger.error("Failed to search for: " + payload_str, err);
@@ -89,13 +85,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
             logger.info("Item search: " + payload_str 
                         + " RESULT:" + result);
             res = {"status" : "OK"}
-            if(payload.username !== undefined){
-              res['items'] = [];
-              result.forEach(function(element) {
-                res['items'].push(element.id);
-              });
-            }
-            else if(Array.isArray(result)) res['items'] = result;
+            if(Array.isArray(result)) res['items'] = result;
             else res['item'] = result;
           }
           
