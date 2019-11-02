@@ -106,7 +106,6 @@ function add_item(payload, callback){
   });
 }
 
-//TODO del tweet
 function del_item(){}
 
 function search_item(id, options, callback){

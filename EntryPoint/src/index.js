@@ -136,9 +136,19 @@ app.post('/additem', (req, res, next) => {
         .then((response) => res.json(response));
 });
 
+app.delete('/item/:id', (req, res, next) => {
+    var username = cookies.readAuthToken(req.signedCookies);
+    if(!request_checker.verify(username, res)) return;
+
+    var id = req.params.id;
+    messenger.sendRPCMessage(JSON.stringify({"id":id}), "", "delete_item")
+        .then((response) => utils.send_response(res, response));
+});
+
 app.post('/search', (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     var json = request_checker.search_item_check(req.body);
+    var username = cookies.readAuthToken(req.signedCookies);
     if(utils.send_response(res, json) == true) return;
 
     messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")

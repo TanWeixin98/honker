@@ -22,6 +22,13 @@ module.exports = {
     });
   },
 
+  remove : function(collection_name, query, callback){
+    mongodb.collection(collection_name).deleteOne(query, function(err, result{
+      if(err) return callback(err, null);
+      return callback(null, result);
+    }));
+  },
+
   search : function(collection_name, query, projections, max=1,sort_rule={}, callback){
     mongodb.collection(collection_name).find(query, {projection:projections}).sort(sort_rule).limit(max).toArray(function(err, result){
       if(err) return callback(err, null);
