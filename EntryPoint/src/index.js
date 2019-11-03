@@ -80,7 +80,6 @@ app.get('/user/:username', (req, res, next) => {
 
 app.get('/user/:username/posts', (req, res, next) => {
     var limit = request_checker.checkLimit(req.query.limit)
-    console.log('limit:', limit)
     var currentTime = Math.round((new Date()).getTime() / 1000);
     if(limit == null){
         res.json({ status: 'error', error: 'The provided limit is invalid' })

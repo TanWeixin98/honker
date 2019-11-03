@@ -100,6 +100,11 @@ module.exports = {
 
     followUser: (req) => {
         return new Promise((resolve, reject) => {
+            if(req.follower === req.followee){
+                console.log(req.follower, ' tried to follow themself');
+                resolve({ status: 'error', error: 'You cannot follow yourself' });
+                return;
+            }
             db.findOne({ username: req.follower })
                 .then((follower) => {
                     if(follower == null){
