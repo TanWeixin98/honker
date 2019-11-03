@@ -77,12 +77,9 @@ module.exports = {
     else if(limit < 1 || limit > 100)
       return {"status":"error", "error":"limit is either less than 1 or greater than 100."}
     
-    if(following){
-      if(login_username == null)
-        return {"status":"error", "error":"Not login to view tweets from follower"}
-      
-
-      msg_json["login_username"] = login_username;
+    if(login_username != null){
+      if(following)
+        msg_json["login_username"] = login_username;
     }
     
     msg_json['timestamp'] = ts;
