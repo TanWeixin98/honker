@@ -152,15 +152,16 @@ app.post('/search', (req, res, next) => {
     if(utils.send_response(res, json) == true) return;
 
     if(json.following){
-      messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: 200 }), 'getFollowers', 'UserAPI')
-          .then((response) =>{
-          var follower_list = response.users;
-          messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
-            .then((response) => utils.send_response(res, response));
-      });
+        messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: 200 }), 'getFollowers', 'UserAPI')
+            .then((response) =>{
+            var follower_list = (response.status == 'OK') ?response.users :[];
+            json['follower_list'] = follower_list;
+            messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
+                .then((response) => utils.send_response(res, response));
+        });
     }else{
-      messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
-          .then((response) => utils.send_response(res, response));
+        messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
+            .then((response) => utils.send_response(res, response));
     }
 });
 
