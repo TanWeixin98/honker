@@ -67,7 +67,7 @@ module.exports = {
       following = true;
     
     if(search_user !== undefined)
-      msg_json['search_user'] = search_user
+      msg_json['username'] = search_user
     
     if(search_query !== undefined && search_query != "")
       msg_json['query'] = search_query
@@ -80,6 +80,8 @@ module.exports = {
     if(following){
       if(login_username == null)
         return {"status":"error", "error":"Not login to view tweets from follower"}
+      
+
       msg_json["login_username"] = login_username;
     }
     

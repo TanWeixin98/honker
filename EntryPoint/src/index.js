@@ -151,8 +151,17 @@ app.post('/search', (req, res, next) => {
     var username = cookies.readAuthToken(req.signedCookies);
     if(utils.send_response(res, json) == true) return;
 
-    messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
-        .then((response) => utils.send_response(res, response));
+    if(json.following){
+      messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: 200 }), 'getFollowers', 'UserAPI')
+          .then((response) =>{
+          var follower_list = response.users;
+          messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
+            .then((response) => utils.send_response(res, response));
+      });
+    }else{
+      messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
+          .then((response) => utils.send_response(res, response));
+    }
 });
 
 app.get('/item/:id', (req, res, next) => {
