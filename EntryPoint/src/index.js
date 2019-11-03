@@ -79,7 +79,8 @@ app.get('/user/:username', (req, res, next) => {
 
 
 app.get('/user/:username/posts', (req, res, next) => {
-    var limit = request_checker.checkLimit(req.body.limit)
+    var limit = request_checker.checkLimit(req.query.limit)
+    console.log('limit:', limit)
     var currentTime = Math.round((new Date()).getTime() / 1000);
     if(limit == null){
         res.json({ status: 'error', error: 'The provided limit is invalid' })
@@ -90,7 +91,7 @@ app.get('/user/:username/posts', (req, res, next) => {
 });
 
 app.get('/user/:username/followers', (req, res, next) => {
-    var limit = request_checker.checkLimit(req.body.limit)
+    var limit = request_checker.checkLimit(req.query.limit)
     var currentTime = Math.round((new Date()).getTime() / 1000);
     if(limit == null){
         res.json({ status: 'error', error: 'The provided limit is invalid' })
@@ -101,7 +102,7 @@ app.get('/user/:username/followers', (req, res, next) => {
 });
 
 app.get('/user/:username/following', (req, res, next) => {
-    var limit = request_checker.checkLimit(req.body.limit)
+    var limit = request_checker.checkLimit(req.query.limit)
     var currentTime = Math.round((new Date()).getTime() / 1000);
     if(limit == null){
         res.json({ status: 'error', error: 'The provided limit is invalid' })

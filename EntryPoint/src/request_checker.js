@@ -41,11 +41,14 @@ module.exports = {
             console.log('Tried to limit a query with a non number: ', limit);
             return null;
         }
-        if(limit < 1 || limit > 200){
+        else if(limit < 1){
             console.log('Limit not in range:', limit);
             return null;
         }
-        return limit;
+        else if(limit > 200){
+            return 200;
+        }
+        return Number.parseInt(limit);
     },
 
   search_item_check: function(req, login_username){
