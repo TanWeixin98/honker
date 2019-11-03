@@ -13,6 +13,14 @@ module.exports = {
                     }); 
   },
 
+  index : function(collection_name, indexs, callback){
+    mongodb.collection(collection_name).createIndex(indexs, {default_language : "none"},
+      function(err, result){
+        if(err) return callback(err);
+        return callback(null);
+      });
+  },
+
   add : function(collection_name, object, callback){
     mongodb.collection(collection_name).insertOne(object, function(err, result){
       if(err) return callback(err);
@@ -23,10 +31,10 @@ module.exports = {
   },
 
   remove : function(collection_name, query, callback){
-    mongodb.collection(collection_name).deleteOne(query, function(err, result{
-      if(err) return callback(err, null);
-      return callback(null, result);
-    }));
+    mongodb.collection(collection_name).deleteOne(query, function(err, result){
+      if(err) return callback(err);
+      return callback(null);
+    });
   },
 
   search : function(collection_name, query, projections, max=1,sort_rule={}, callback){
