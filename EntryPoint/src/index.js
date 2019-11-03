@@ -152,7 +152,7 @@ app.post('/search', (req, res, next) => {
     if(utils.send_response(res, json) == true) return;
 
     if(json.following){
-        messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: 200 }), 'getFollowers', 'UserAPI')
+        messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: null }), 'getFollowers', 'UserAPI')
             .then((response) =>{
             var follower_list = (response.status == 'OK') ?response.users :[];
             json['follower_list'] = follower_list;
