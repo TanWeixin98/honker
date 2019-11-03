@@ -84,7 +84,7 @@ app.get('/user/:username/posts', (req, res, next) => {
         res.json({ status: 'error', error: 'The provided limit is invalid' })
         return;
     }
-    messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, limit: limit, timestamp: currentTime }), '', 'search_item')
+    messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, getIDOnly: true, limit: limit, timestamp: currentTime }), '', 'search_item')
         .then((response) => res.json(response));
 });
 
