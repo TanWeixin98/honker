@@ -153,11 +153,11 @@ app.post('/search', (req, res, next) => {
     var username = cookies.readAuthToken(req.signedCookies);
     if(utils.send_response(res, json) == true) return;
 
-    if(json.following){
-        messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: null }), 'getFollowers', 'UserAPI')
+    if(json.login_username !== undefined){
+        messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: null }), 'getFollowing', 'UserAPI')
             .then((response) =>{
-            var follower_list = (response.status == 'OK') ?response.users :[];
-            json['follower_list'] = follower_list;
+            var following_list = (response.status == 'OK') ?response.users :[];
+            json['following_list'] = following_list;
             messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
                 .then((response) => utils.send_response(res, response));
         });

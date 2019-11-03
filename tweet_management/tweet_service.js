@@ -137,9 +137,9 @@ amqp.connect(amqp_url, function(connection_err, connection){
               else if(Array.isArray(result)){
                 res['items'] = result;
                 console.log(result);
-                console.log(payload.follower_list);
-                if(payload.following){
-                  res['items'] = utils.filter_tweets(result, payload.follower_list);  
+                console.log(payload.following_list);
+                if(payload.following_list !== undefined){
+                  res['items'] = utils.filter_tweets(result, payload.following_list);  
                 }
               }
               else res['item'] = result;
@@ -176,8 +176,6 @@ function search_item(id, options, callback){
     if(options.query !== undefined){
       query['$text'] = {$search: options.query};
     }
-    console.log(query)
-    console.log(options)
     mongodb.search("tweet", query, options.projections ,options.limit, {'timestamp': -1},function(err, result){
       if(err && err.message == "No matches") return callback(null, []);
       if(err) return callback(err, null);
