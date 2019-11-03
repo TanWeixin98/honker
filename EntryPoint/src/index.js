@@ -1,15 +1,14 @@
 var express = require('express');
 var cookieParser = require('cookie-parser');
-var logger = require('morgan');
 var cors = require('cors');
 var path = require('path');
+var pino = require('express-pino-logger')()
 
 var app = express();
 app.listen(8000, () => { console.log('EntryPoint is listening on port 8000'); });
 
 console.log(path.resolve(__dirname, '../../EntryPoint'));
 
-app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser('TeamLiquid :('));
@@ -19,6 +18,8 @@ app.use(cors(
         credentials: true
     }
 ));
+app.use(pino)
+
 app.use(express.static(path.resolve(__dirname, '../../frontend/build')));
 
 const messenger = require( './clientMessenger' );
