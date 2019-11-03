@@ -4,7 +4,7 @@ const Logger = require('./utils/logger.js');
 const mongodb = require('./utils/mongodb.js');
 const utils = require('./tweet_utils.js');
 
-const mongo_ip = "localhost";
+const mongo_ip = "130.245.168.214";
 const amqp_url = "amqp://localhost";
 const mongo_url = "mongodb://" + mongo_ip + "/tweet";
 
@@ -127,7 +127,14 @@ amqp.connect(amqp_url, function(connection_err, connection){
               logger.info("Item search: " + payload_str 
                           + " RESULT:" + result);
               res = {"status" : "OK"}
-              if(Array.isArray(result)){
+
+              if(payload.getIDOnly !== undefined){
+                res['items'] = []
+                result.forEach(function(element){
+                  res['items'].push(element.id);
+                });
+              }
+              else if(Array.isArray(result)){
                 res['items'] = result;
                 console.log(result);
                 console.log(payload.follower_list);
