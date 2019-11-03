@@ -34,23 +34,6 @@ module.exports = {
         return req;
     },
 
-    search_item_check: function(req){
-        var ts = req.timestamp;
-        var limit = req.limit;
-        if(limit === undefined){
-            limit = 25;
-        }
-        if(ts === undefined){
-            ts = Date.now();
-        }
-        if(!Number.isFinite(ts) || !Number.isInteger(limit)){
-            return {"status":"error" , "error":"Either ts or limit is not type int."};
-        }else if(limit < 1 || limit > 100){
-            return {"status":"error", "error":"limit is either less than 1 or greater than 100."}
-        }
-        return {"timestamp":ts , "limit":limit};
-    },
-
     // For the range 1 < limit < 200
     checkLimit: (limit) => {
         if(limit == null) return 50; // Default is 50
@@ -63,7 +46,47 @@ module.exports = {
             return null;
         }
         return limit;
+    },
+
+  search_item_check: function(req, login_username){
+    var msg_json = {};
+
+    var ts = req.timestamp;
+    var limit = req.limit;
+    var search_query = req.q;
+    var search_user = req.username;
+    var following = req.following;
+
+    if(limit === undefined)
+      limit = 25;
+    
+    if(ts === undefined)
+      ts = Date.now();
+    
+    if(following === undefined)
+      following = true;
+    
+    if(search_user !== undefined)
+      msg_json['username'] = search_user
+    
+    if(search_query !== undefined && search_query != "")
+      msg_json['query'] = search_query
+    
+    if(!Number.isFinite(ts) || !Number.isInteger(limit))
+      return {"status":"error" , "error":"Either ts or limit is not type int."};
+    else if(limit < 1 || limit > 100)
+      return {"status":"error", "error":"limit is either less than 1 or greater than 100."}
+    
+    if(following){
+      if(login_username == null)
+        return {"status":"error", "error":"Not login to view tweets from follower"}
+      
+
+      msg_json["login_username"] = login_username;
     }
-
-
+    
+    msg_json['timestamp'] = ts;
+    msg_json['limit'] = limit;
+    return msg_json;
+  }
 }

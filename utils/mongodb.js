@@ -13,11 +13,26 @@ module.exports = {
                     }); 
   },
 
+  index : function(collection_name, indexs, callback){
+    mongodb.collection(collection_name).createIndex(indexs, {default_language : "none"},
+      function(err, result){
+        if(err) return callback(err);
+        return callback(null);
+      });
+  },
+
   add : function(collection_name, object, callback){
     mongodb.collection(collection_name).insertOne(object, function(err, result){
       if(err) return callback(err);
       
       //TODO log success
+      return callback(null);
+    });
+  },
+
+  remove : function(collection_name, query, callback){
+    mongodb.collection(collection_name).deleteOne(query, function(err, result){
+      if(err) return callback(err);
       return callback(null);
     });
   },
