@@ -68,8 +68,8 @@ module.exports = {
                     else{
                         var followers = user.followers;
                         var limit = req.limit;
-                        if(limit == null) limit = 50;
-                        followers = followers.slice(0, limit);
+                        if(limit != null) 
+                            followers = followers.slice(0, limit);
                         console.log(followers);
                         resolve({ status: 'OK', users: followers });
                     }
@@ -89,8 +89,8 @@ module.exports = {
                     else{
                         var following = user.following;
                         var limit = req.limit;
-                        if(limit == null) limit = 50;
-                        following = following.slice(0, limit);
+                        if(limit != null)
+                            following = following.slice(0, limit);
                         console.log(following)
                         resolve({ status: 'OK', users: following });
                     }
