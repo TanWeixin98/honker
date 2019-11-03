@@ -43,7 +43,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
     channel.assertExchange(exchange, 'direct', {durable: false});
 
     //add item
-    channel.assertQueue('add_item', {exclusive: true, durable: false}, function(add_err, add_queue){
+    channel.assertQueue('add_item', {durable: false}, function(add_err, add_queue){
       if(add_err){
         logger.error("Assert add queue failed. ", add_err);
         return;
@@ -72,7 +72,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
     });
 
     //remove 
-    channel.assertQueue('delete_item', {exclusive: true, durable: false}, function(remove_err, remove_queue){
+    channel.assertQueue('delete_item', {durable: false}, function(remove_err, remove_queue){
       if(remove_err){
         logger.error("Assert search queue failed. ", remove_err);
         return;
@@ -101,7 +101,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
     });
 
     //search
-    channel.assertQueue('search_item', {exclusive: true, durable: false}, function(search_err, search_queue){
+    channel.assertQueue('search_item', {durable: false}, function(search_err, search_queue){
       if(search_err){
         logger.error("Assert search queue failed. ", search_err);
         return;
