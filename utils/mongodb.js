@@ -32,8 +32,8 @@ module.exports = {
 
   remove : function(collection_name, query, callback){
     mongodb.collection(collection_name).deleteOne(query, function(err, result){
-      if(err) return callback(err);
-      return callback(null);
+      if(err) return callback(err, null);
+      return callback(null, result);
     });
   },
 
