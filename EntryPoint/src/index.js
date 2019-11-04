@@ -143,7 +143,13 @@ app.delete('/item/:id', (req, res, next) => {
 
     var id = req.params.id;
     messenger.sendRPCMessage(JSON.stringify({"id":id, "username": username}), "", "delete_item")
-            .then((response) => utils.send_response(res, response));
+            .then((response) => {
+                if(response.status == 'OK')
+                    res.statusCode = 200;
+                else
+                    res.statusCode = 444;
+                res.end();
+            });
 });
 
 app.post('/search', (req, res, next) => {
