@@ -113,6 +113,11 @@ amqp.connect(amqp_url, function(connection_err, connection){
         var payload_str = msg.content.toString();
         var payload = JSON.parse(payload_str);
 
+        if(payload.following_list !== undefined){
+          var limit = payload.limit;
+          payload.limit = 0;
+        }
+
         search_item(payload.id, {"timestamp" : payload.timestamp, 
                                  "username": payload.username,
                                  "limit" : payload.limit, 
@@ -139,7 +144,8 @@ amqp.connect(amqp_url, function(connection_err, connection){
                 console.log(result);
                 console.log(payload.following_list);
                 if(payload.following_list !== undefined){
-                  res['items'] = utils.filter_tweets(result, payload.following_list);  
+                  res['items'] = utils.filter_tweets(result, payload.following_list, limit);  
+                  console.log(res['items'])
                 }
               }
               else res['item'] = result;
