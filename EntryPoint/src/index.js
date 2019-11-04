@@ -148,17 +148,17 @@ app.delete('/item/:id', (req, res, next) => {
 
 app.post('/search', (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
-    var json = request_checker.search_item_check(req.body);
     var username = cookies.readAuthToken(req.signedCookies);
+    var json = request_checker.search_item_check(req.body, username);
     if(utils.send_response(res, json) == true) return;
 
     if(json.login_username !== undefined){
         messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: null }), 'getFollowing', 'UserAPI')
             .then((response) =>{
-            var following_list = (response.status == 'OK') ?response.users :[];
-            json['following_list'] = following_list;
-            messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
-                .then((response) => utils.send_response(res, response));
+              var following_list = (response.status == 'OK') ?response.users :[];
+              json['following_list'] = following_list;
+              messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
+                  .then((response) => utils.send_response(res, response));
         });
     }else{
         messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
