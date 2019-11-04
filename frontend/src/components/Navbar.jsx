@@ -69,6 +69,7 @@ class NavBar extends Component {
       .then(() => {
         history.push('/');
         alert('You have logged out')
+        this.setState({ isAuthenticated: false });
       })
       .catch(error => console.error(error));
   }
