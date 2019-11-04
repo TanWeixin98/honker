@@ -169,9 +169,11 @@ function add_item(payload, callback){
 }
 
 function del_item(payload, callback){
-  mongodb.remove("tweet", payload, function(err){
-    if(err) return callback(err);
-    return callback(null)
+  mongodb.remove("tweet", payload, function(del_err, obj){
+    console.log(obj.result.n)
+    if(del_err) return callback(del_err) 
+    if(obj.result.n != 1) return callback(new Error("cannot delete others post"));
+    return callback(null);
   });
 }
 

@@ -142,8 +142,8 @@ app.delete('/item/:id', (req, res, next) => {
     if(!request_checker.verify(username, res)) return;
 
     var id = req.params.id;
-    messenger.sendRPCMessage(JSON.stringify({"id":id}), "", "delete_item")
-        .then((response) => utils.send_response(res, response));
+    messenger.sendRPCMessage(JSON.stringify({"id":id, "username": username}), "", "delete_item")
+            .then((response) => utils.send_response(res, response));
 });
 
 app.post('/search', (req, res, next) => {
