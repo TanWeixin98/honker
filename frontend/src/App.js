@@ -1,5 +1,7 @@
 import React from 'react'
 import './css/App.css'
+import './popup.css'
+import './tweet.css'
 import {
     BrowserRouter as Router,
     Switch,
@@ -9,6 +11,10 @@ import {
 import NavBar from './components/Navbar'
 import UserAuth from './components/UserAuth'
 import Verify from './components/Verify'
+import Post from './components/Post'
+import SearchPopup from './components/SearchPopup'
+import Tweets from './components/Tweets'
+import ById from './components/ById'
 
 function App() {
     return (
@@ -18,6 +24,10 @@ function App() {
                     <Switch>
                         <Route path='/login' component={UserAuth}/>
                         <Route path='/verify' component={Verify}/>
+                        <Route path='/post' component={Post}/>
+                        <Route path='/search' component={SearchPopup}/>
+                        <Route path='/tweets' component={Tweets}/>
+                        <Route path='/byid' component={ById}/>
                     </Switch>
                 </Router>
             </div>
