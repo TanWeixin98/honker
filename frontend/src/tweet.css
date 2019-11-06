@@ -1,0 +1,17 @@
+
+.tweet_btn{
+   height : 30%;
+}
+
+ .tweet_time_and_buttons *{
+   margin: 10px;
+}
+
+.tweet_content{
+   height: 200px;
+}
+
+.user_thumbnail{
+   width : 80px;
+   height: 80px;
+}
