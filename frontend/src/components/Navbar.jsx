@@ -21,9 +21,16 @@ class NavBar extends Component {
         <LinkContainer to='/login'>
           <Nav.Link>Login</Nav.Link>
         </LinkContainer>
+        <LinkContainer to='/post'>
+          <Nav.Link>Post Item</Nav.Link>
+        </LinkContainer>
+        <LinkContainer to='/search'>
+          <Nav.Link>Search Items</Nav.Link>
+        </LinkContainer>
+        <LinkContainer to='/byid'>
+          <Nav.Link>ByID</Nav.Link>
+        </LinkContainer>
         <Button onClick={this.handleLogout}>Logout</Button>
-
-
       </Navbar>
     );
   }
