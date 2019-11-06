@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser('TeamLiquid :('));
 app.use(cors(
     {
-        origin:' http://localhost:3000',
+        origin: (origin, callback) => { return callback(null, true); },
         credentials: true
     }
 ));
