@@ -1,5 +1,5 @@
 import React, {Component} from  'react';
-import {Form, Alert, Button} from 'react-bootstrap';
+import {Form, Alert, Button, Container} from 'react-bootstrap';
 
 class Post extends Component{
   state = {
@@ -7,7 +7,7 @@ class Post extends Component{
   }
   render() {
     return(
-      <div class = 'container'>
+      <Container>
         <Form onSubmit={this.handleSubmit}>
           <Form.Group controlId="content">
             <Form.Control as="textarea" rows="3" onChange = {this.handleChange}/>
@@ -15,7 +15,7 @@ class Post extends Component{
             <Button type = "submit">Post</Button>
           </Form.Group>
         </Form>
-      </div>
+      </Container>
     ); 
   }
 

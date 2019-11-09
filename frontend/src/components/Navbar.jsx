@@ -1,13 +1,15 @@
 import React, { Component } from "react";
-import { Navbar, Nav, DropdownButton, Dropdown } from "react-bootstrap";
+import { Navbar, Nav, DropdownButton, Dropdown, Button } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { withRouter } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import API from "../constants";
+import SearchModal from './SearchModal'
 
 class NavBar extends Component {
   state = {
     isAuthenticated: false,
+    showSearch: false
   };
 
   constructor(props) {
@@ -21,7 +23,7 @@ class NavBar extends Component {
   }
 
   render() {
-    var loginButton, userDropdown;
+    var loginButton, userDropdown, searchModal;
     if (this.state.isAuthenticated) {
       loginButton = undefined;
       userDropdown = this.userDropdown;
@@ -30,8 +32,13 @@ class NavBar extends Component {
       loginButton = <LinkContainer to='/login'><Nav.Link>Login</Nav.Link></LinkContainer>;
       userDropdown = undefined;
     }
+    if(this.state.showSearch){
+      searchModal = <SearchModal/>
+    }
 
     return (
+      <>
+      {searchModal}
       <Navbar
         bg="light"
         expand="lg"
@@ -46,9 +53,7 @@ class NavBar extends Component {
         <LinkContainer to='/post'>
           <Nav.Link>Post Item</Nav.Link>
         </LinkContainer>
-        <LinkContainer to='/search'>
-          <Nav.Link>Search Items</Nav.Link>
-        </LinkContainer>
+        <SearchModal/>
         <LinkContainer to='/byid'>
           <Nav.Link>ByID</Nav.Link>
         </LinkContainer>
@@ -57,10 +62,8 @@ class NavBar extends Component {
           {loginButton}
           {userDropdown}
         </Navbar.Collapse>
-
-
-
       </Navbar>
+      </>
     );
   }
 
@@ -98,7 +101,7 @@ class NavBar extends Component {
     fetch(url, { credentials: 'include' })
       .then(response => response.json())
       .then(res => {
-        if(res.username !== null)
+        if (res.username !== null)
           history.push('/' + res.username)
         else
           history.push('/login')
