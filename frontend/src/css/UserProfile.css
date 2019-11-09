@@ -1,0 +1,15 @@
+.UserProfileContainer{
+    margin-left: 0%;
+    margin-top: 3vmin;
+}
+
+.UserProfileCol{
+    max-width: 20vw;
+}
+
+
+.nav{
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 5px;
+}

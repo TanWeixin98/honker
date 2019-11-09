@@ -15,6 +15,7 @@ import Post from './components/Post'
 import SearchPopup from './components/SearchPopup'
 import Tweets from './components/Tweets'
 import ById from './components/ById'
+import UserProfile from './components/UserProfile'
 
 function App() {
     return (
@@ -28,6 +29,7 @@ function App() {
                         <Route path='/search' component={SearchPopup}/>
                         <Route path='/tweets' component={Tweets}/>
                         <Route path='/byid' component={ById}/>
+                        <Route exact path='/:username' render={props => <UserProfile {...props}/>}/>
                     </Switch>
                 </Router>
             </div>
