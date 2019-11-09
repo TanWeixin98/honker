@@ -1,4 +1,6 @@
 import React, {Component} from  'react';
+import {Container, Row, Col} from 'react-bootstrap';
+import './../css/tweet.css';
 
 class Tweet extends Component{
 
@@ -16,24 +18,38 @@ class Tweet extends Component{
 
   render() {
     return(
-      <div class = 'container'>
-        <div class ='row'>
-          <div class = 'col-sm-1 tweet_user_display'>
-            <img class = 'user_thumbnail' src = 'https://image.shutterstock.com/z/stock-vector-profile-blank-icon-empty-photo-of-male-gray-person-picture-isolated-on-white-background-good-535853269.jpg'/>
-            <a>{this.state.username}</a>
-          </div>
-        
-          <div class = 'col-8 tweet_content_info'>
-            <p class = 'tweet_content'>{this.state.content}</p>
-            <div class = "tweet_time_and_buttons">
-              <button class = 'btn-xs btn-primary tweet_btn' onClick = {this.handleLike}><i class="fa fa-thumbs-up">{this.state.likes}Likes</i></button>
-              <button class = 'btn-xs btn-primary tweet_btn'>Comments</button>
-              <span>{this.state.time}</span>
+      <Container className = 'Tweet'>
+          <Row>
+            <Col xs={2}>
+              <img className = 'user_thumbnail' src = 'https://image.shutterstock.com/z/stock-vector-profile-blank-icon-empty-photo-of-male-gray-person-picture-isolated-on-white-background-good-535853269.jpg' alt = {this.state.usernam}/>
+              </Col>
+              <Col>
+                <div className = 'tweet_username'>
+                  <span>{this.state.username}</span>
+                </div>
+                <div className = 'tweet_time'>
+                  <span>{this.convertTs(this.state.time)}</span>
+                </div>
+              </Col>
+          </Row>
+          <Row>
+            <div className = 'tweet_content'>
+              <p>{this.state.content}</p>
             </div>
-          </div>
-        </div>
-      </div>
+          </Row>
+          <Row>
+            <div className ='likes_and_retweet'>
+              <button className = 'btn-xs btn-primary like_btn' onClick = {this.handleLike}><i className="fa fa-thumbs-up">{this.state.likes}Likes</i></button>
+              <button className = 'btn-xs btn-primary tweet_btn'>Retweet</button>
+            </div>
+          </Row>
+      </Container>
     ); 
+  }
+  
+  convertTs = (ts) => {
+    var ts = new Date(Math.round(ts * 1000));
+    return ts.toLocaleString();
   }
 
   handleLike = () =>{

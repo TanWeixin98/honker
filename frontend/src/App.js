@@ -1,7 +1,5 @@
 import React from 'react'
 import './css/App.css'
-import './popup.css'
-import './tweet.css'
 import {
     BrowserRouter as Router,
     Switch,
