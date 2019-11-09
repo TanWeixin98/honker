@@ -2,30 +2,33 @@ import React, { Component } from 'react'
 import API from '../constants'
 import '../css/UserProfile.css'
 import { Container, Col, Row, Nav, Button } from 'react-bootstrap';
+import UserList from './UserList'
+
+const initialState = {
+    username: null,
+    followerCount: null,
+    followingCount: null,
+    followers: null,
+    following: null,
+    currentView: 'Posts',
+    isFollowing: false,
+    currentUser: null,
+    followButtonUpdated: false
+}
 
 class UserProfile extends Component {
 
-    state = {
-        username: null,
-        followerCount: null,
-        followingCount: null,
-        followers: null,
-        following: null,
-        currentView: 'Posts',
-        isFollowing: false,
-        currentUser: null,
-        followButtonUpdated: false
-    }
-
     constructor(props) {
         super(props)
-        this.state.username = this.props.location.pathname.slice(1)
+        this.state = initialState
+        this.state.username = this.props.match.params.username
+        this.state.currentView = this.props.match.params.view
         this.setUserState()
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.match.params.username !== prevState.username)
-            return { username: nextProps.match.params.username };
+            return { ...initialState, username: nextProps.match.params.username }
         else
             return null;
     }
@@ -36,9 +39,27 @@ class UserProfile extends Component {
     }
 
     render() {
-        var followButton = undefined;
-        if(this.state.isFollowing != null)
-            followButton = <Button onClick={this.handleFollow}>{this.state.isFollowing ? 'Unfollow' : 'Follow'}</Button>
+        var followButton
+        if (this.state.followButtonUpdated)
+            followButton = <Button onClick={this.handleFollow} style={{ visibility: (this.state.isFollowing == null ? 'hidden' : 'visible') }}>
+                {this.state.isFollowing ? 'Unfollow' : 'Follow'}
+            </Button>
+
+        var userView
+        switch(this.state.currentView){
+            case 'posts':
+                userView = 'Posts'
+                break
+            case 'followers':
+                userView = <UserList userList={this.state.followers} username={this.state.username} view='Followers'/>
+                break
+            case 'following':
+                userView = <UserList userList={this.state.following} username={this.state.username} view='Following'/>
+                break
+            default:
+                userView = <div/>
+        }
+
         return (
             <Container className='UserProfileContainer'>
                 <Row>
@@ -47,17 +68,13 @@ class UserProfile extends Component {
                             <h2 className='centered'>@{this.state.username}</h2>
                             {followButton}
                             <br />
-                            <Nav.Link eventKey="Posts">Posts</Nav.Link>
-                            <Nav.Link eventKey="Follower">Follower</Nav.Link>
-                            <Nav.Link eventKey="Following">Following</Nav.Link>
+                            <Nav.Link eventKey="posts">Posts</Nav.Link>
+                            <Nav.Link eventKey="followers">Followers ({this.state.followerCount})</Nav.Link>
+                            <Nav.Link eventKey="following">Following ({this.state.followingCount})</Nav.Link>
                         </Nav>
                     </Col>
                     <Col>
-                        {this.state.currentView}
-                        <br />
-                        {this.state.followers}
-                        <br />
-                        {this.state.following}
+                        {userView}
                     </Col>
                 </Row>
 
@@ -68,6 +85,10 @@ class UserProfile extends Component {
 
     handleSelect = (selectedKey) => {
         this.setState({ currentView: selectedKey })
+        if(selectedKey == 'posts')
+            this.props.history.push('/' + this.state.username)
+        else
+            this.props.history.push('/' + this.state.username + '/' + selectedKey)
     }
 
     handleFollow = () => {
@@ -91,6 +112,7 @@ class UserProfile extends Component {
         this.getCurrentUser()
         this.getUser()
         this.getFollowers()
+        this.getFollowing()
     }
 
     getUser = () => {
@@ -129,6 +151,16 @@ class UserProfile extends Component {
             .then(response => response.json())
             .then(res => {
                 this.setState({ followers: res.users }, this.setFollowState)
+            })
+            .catch(error => console.error(error))
+    }
+
+    getFollowing = () => {
+        var url = API + '/user/' + this.state.username + '/following'
+        fetch(url)
+            .then(response => response.json())
+            .then(res => {
+                this.setState({ following: res.users })
             })
             .catch(error => console.error(error))
     }

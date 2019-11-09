@@ -29,7 +29,7 @@ function App() {
                         <Route path='/search' component={SearchPopup}/>
                         <Route path='/tweets' component={Tweets}/>
                         <Route path='/byid' component={ById}/>
-                        <Route exact path='/:username' render={props => <UserProfile {...props}/>}/>
+                        <Route path='/:username/:view?' render={props => <UserProfile {...props}/>}/>
                     </Switch>
                 </Router>
             </div>
