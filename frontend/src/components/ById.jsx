@@ -9,7 +9,7 @@ class ById extends Component{
 
   render() {
     return(
-      <div class = 'container'>
+      <div className = 'container'>
         <Form>
           <Form.Group controlId="id">
             <Form.Control type="text" placeholder="ID" onChange = {this.handleChange}/>
