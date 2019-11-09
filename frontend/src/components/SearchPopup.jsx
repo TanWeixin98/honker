@@ -1,5 +1,6 @@
 import React, {Component} from  'react';
 import {Button, Container, Form, Col} from 'react-bootstrap';
+import './../css/popup.css'
 
 class SearchPopup extends Component{
 
