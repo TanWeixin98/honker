@@ -57,7 +57,7 @@ class SearchModal extends Component {
                                 </Form.Row>
                             </Form.Group>
                             <Form.Group controlId="following" onChange={this.handleChange}>
-                                <Form.Check type="checkbox" label="Only show posts by people I follow" defaultChecked/>
+                                <Form.Check type="checkbox" label="Only show posts by people I follow" defaultChecked />
                             </Form.Group>
                         </Form>
                     </Modal.Body>
@@ -95,7 +95,6 @@ class SearchModal extends Component {
         }
     };
 
-
     handleSubmit = e => {
         e.preventDefault();
         const { history } = this.props
@@ -103,7 +102,10 @@ class SearchModal extends Component {
         var payload = {}
         for (let s in this.state) {
             if (this.state[s] != null && payloadParams.includes(s))
-                payload[s] = this.state[s]
+                if (s == 'timestamp')
+                    payload.timestamp = this.state.timestamp.getTime()/1000
+                else
+                    payload[s] = this.state[s]
         }
 
         fetch(url, {
@@ -115,7 +117,7 @@ class SearchModal extends Component {
         })
             .then(res => res.json())
             .then(response => {
-                this.setState({ showModal: false })
+                this.handleClose()
                 this.props.history.push({
                     pathname: '/search',
                     state: { posts: response.items }
