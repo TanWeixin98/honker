@@ -5,19 +5,16 @@ import { withRouter } from 'react-router-dom';
 import API from '../constants'
 import "react-datepicker/dist/react-datepicker.css";
 
-const payloadParams = ['timestamp', 'limit', 'q', 'username', 'following']
-
 class SearchModal extends Component {
 
     state = {
         showModal: false,
-        following: null,
+        following: true,
         q: null,
         username: null,
         limit: null,
         timestamp: null
     }
-
 
     render() {
         return (
@@ -29,19 +26,19 @@ class SearchModal extends Component {
                     </Modal.Header>
                     <Modal.Body>
                         <Form>
-                            <Form.Group controlId='q' onChange={this.handleChange}>
+                            <Form.Group controlId='q'>
                                 <Form.Label>Keywords</Form.Label>
-                                <Form.Control type='text' placeholder='Get posts with text that match these keywords' />
+                                <Form.Control type='text' placeholder='Get posts with text that match these keywords' value={this.state.q ? this.state.q : ''} onChange={this.handleChange} />
                             </Form.Group>
-                            <Form.Group controlId='username' onChange={this.handleChange}>
+                            <Form.Group controlId='username'>
                                 <Form.Label>Username</Form.Label>
-                                <Form.Control type='text' placeholder='Get posts submitted by this user' />
+                                <Form.Control type='text' placeholder='Get posts submitted by this user' value={this.state.username ? this.state.username : ''} onChange={this.handleChange} />
                             </Form.Group>
                             <Form.Group>
                                 <Form.Row>
-                                    <Form.Group as={Col} controlId='limit' className='limitControl' onChange={this.handleChange}>
+                                    <Form.Group as={Col} controlId='limit'>
                                         <Form.Label>Max Posts To Show</Form.Label>
-                                        <Form.Control type='number' defaultValue={50} />
+                                        <Form.Control type='number' value={this.state.limit != null ? this.state.limit : 50} onChange={this.handleChange} />
                                     </Form.Group>
                                     <Form.Group as={Col} controlId='timestamp'>
                                         <Form.Label>Posted before:</Form.Label><br />
@@ -56,14 +53,14 @@ class SearchModal extends Component {
                                     </Form.Group>
                                 </Form.Row>
                             </Form.Group>
-                            <Form.Group controlId="following" onChange={this.handleChange}>
-                                <Form.Check type="checkbox" label="Only show posts by people I follow" defaultChecked />
+                            <Form.Group controlId="following">
+                                <Form.Check type="checkbox" label="Only show posts by people I follow" checked={this.state.following} onChange={this.handleChange} />
                             </Form.Group>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="secondary" onClick={this.handleClose}>
-                            Close
+                        <Button variant="secondary" onClick={this.clearSearchParams}>
+                            Clear
                         </Button>
                         <Button variant="primary" onClick={this.handleSubmit}>
                             Search
@@ -75,8 +72,15 @@ class SearchModal extends Component {
     }
 
     handleShow = () => this.setState({ showModal: true })
-    handleClose = () => this.setState({ showModal: false, timestamp: null })
+    handleClose = () => this.setState({ showModal: false })
     setDate = (date) => this.setState({ timestamp: date })
+    clearSearchParams = () => this.setState({
+        following: true,
+        q: null,
+        username: null,
+        limit: null,
+        timestamp: null
+    })
 
     handleChange = e => {
         switch (e.target.type) {
@@ -101,12 +105,14 @@ class SearchModal extends Component {
         const url = API + '/search'
         var payload = {}
         for (let s in this.state) {
-            if (this.state[s] != null && payloadParams.includes(s))
-                if (s == 'timestamp')
-                    payload.timestamp = this.state.timestamp.getTime()/1000
+            if (this.state[s] != null && s != 'showModal') {
+                if (s == 'following' && this.state[s] == true)
+                    continue
                 else
                     payload[s] = this.state[s]
+            }
         }
+        if (payload.timestamp) payload.timestamp = payload.timestamp.getTime() / 1000
 
         fetch(url, {
             method: "POST",
