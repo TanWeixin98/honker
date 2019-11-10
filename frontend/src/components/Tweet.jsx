@@ -1,5 +1,7 @@
 import React, {Component} from  'react';
 import {Container, Row, Col} from 'react-bootstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {faHeart} from '@fortawesome/free-solid-svg-icons';
 import './../css/tweet.css';
 
 class Tweet extends Component{
@@ -20,7 +22,7 @@ class Tweet extends Component{
     return(
       <Container className = 'Tweet'>
           <Row>
-            <Col xs={2}>
+            <Col xs={1}>
               <img className = 'user_thumbnail' src = 'https://image.shutterstock.com/z/stock-vector-profile-blank-icon-empty-photo-of-male-gray-person-picture-isolated-on-white-background-good-535853269.jpg' alt = {this.state.usernam}/>
               </Col>
               <Col>
@@ -39,7 +41,8 @@ class Tweet extends Component{
           </Row>
           <Row>
             <div className ='likes_and_retweet'>
-              <button className = 'btn-xs btn-primary like_btn' onClick = {this.handleLike}><i className="fa fa-thumbs-up">{this.state.likes}Likes</i></button>
+              <button className = 'btn-xs btn-primary like_btn' onClick = {this.handleLike}>
+              <FontAwesomeIcon icon={faHeart} className = 'heart_icon'/>{this.state.likes} Likes</button>
               <button className = 'btn-xs btn-primary tweet_btn'>Retweet</button>
             </div>
           </Row>

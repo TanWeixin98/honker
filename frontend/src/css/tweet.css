@@ -6,20 +6,22 @@
 }
 
 .tweet_username{
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .tweet_username span{
-  font-size: large;
-}
-
-.tweet_time{
+  font-size: 25px;
 }
 
 .tweet_time span{
-  font-size: x-small;
+  font-size: 8px;
   font-color:lightgray;
   font-style: italic;
+}
+
+.heart_icon{
+  margin-left: 0px;
+  margin-right: 10px;
 }
 
 .tweet_btn{
@@ -29,7 +31,7 @@
   
 }
 
-.likes_and_retweet *{
+.likes_and_retweet >*{
   margin-left: 15px;
   margin-right: 15px;
 }
