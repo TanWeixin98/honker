@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Container, Form, Col, Modal, Nav } from 'react-bootstrap';
+import { Button, Form, Col, Modal, Nav } from 'react-bootstrap';
 import DatePicker from "react-datepicker";
 import { withRouter } from 'react-router-dom';
 import API from '../constants'
@@ -104,8 +104,8 @@ class SearchModal extends Component {
         const url = API + '/search'
         var payload = {}
         for (let s in this.state) {
-            if (this.state[s] != null && s != 'showModal') {
-                if (s == 'following' && this.state[s] == true)
+            if (this.state[s] !== null && s !== 'showModal') {
+                if (s === 'following' && this.state[s] === true)
                     continue
                 else
                     payload[s] = this.state[s]
@@ -125,7 +125,7 @@ class SearchModal extends Component {
                 this.handleClose()
                 this.props.history.push({
                     pathname: '/search',
-                    state: { posts: response.items }
+                    state: { posts: response.items, usage: 'Search Results' }
                 });
 
             })

@@ -34,7 +34,7 @@ class ById extends Component{
     })
       .then(res => res.json())
       .then(response => {
-        if(response.status =="OK"){
+        if(response.status === "OK"){
           this.props.history.push({
              pathname: '/tweets',  
              state: { tweets: [response.item] }
@@ -56,7 +56,7 @@ class ById extends Component{
       .then( res => res.json())
       .then(response => {
          console.log(response)
-         if(response.statusCode==200){
+         if(response.statusCode===200){
             alert("Deleted");
          }else{
             alert("Failed to Delete");

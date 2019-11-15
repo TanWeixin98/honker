@@ -1,6 +1,6 @@
 import React, { Component } from "react"
-import { Container, Col, Row, Nav } from 'react-bootstrap';
-import { LinkContainer, Link } from "react-router-bootstrap";
+import { Container, Col, Nav } from 'react-bootstrap';
+import { LinkContainer } from "react-router-bootstrap";
 
 class UserList extends Component {
 
@@ -29,7 +29,7 @@ class UserList extends Component {
         if (this.state.userList != null)
             return this.state.userList.map(username => <LinkContainer to={'/'+username} key={username}><Nav.Link>{username}</Nav.Link></LinkContainer>)
         else
-            return <p>{this.state.currentView == 'Followers' ? this.state.username + ' has no followers' : this.state.username + ' is not following anyone'}</p>
+            return <p>{this.state.currentView === 'Followers' ? this.state.username + ' has no followers' : this.state.username + ' is not following anyone'}</p>
     }
 }
 

@@ -3,7 +3,7 @@ import API from '../constants'
 import '../css/UserProfile.css'
 import { Container, Col, Row, Nav, Button } from 'react-bootstrap';
 import UserList from './UserList'
-import Tweet from './Tweet'
+import PostList from './PostList';
 
 const initialState = {
     username: null,
@@ -12,7 +12,7 @@ const initialState = {
     followers: null,
     following: null,
     posts: null,
-    currentView: 'posts',
+    currentView: null,
     isFollowing: false,
     currentUser: null,
     followButtonUpdated: false,
@@ -52,15 +52,7 @@ class UserProfile extends Component {
         if (!this.state.error)
             switch (this.state.currentView) {
                 case 'posts':
-                    userView = this.state.posts ?
-                        this.state.posts.map(post => {
-                            return <Tweet key={post._id}
-                                username={post.username}
-                                tweet_id={post.id}
-                                content={post.content}
-                                time={post.timestamp}
-                                likes={post.likes} />
-                        }) : 'This user has not posted anything'
+                    userView = <PostList posts={this.state.posts}/>
                     break
                 case 'followers':
                     userView = <UserList userList={this.state.followers} username={this.state.username} view='Followers' />
@@ -69,7 +61,7 @@ class UserProfile extends Component {
                     userView = <UserList userList={this.state.following} username={this.state.username} view='Following' />
                     break
                 default:
-                    userView = 'Posts'
+                    userView = undefined
             }
         else
             userView = 'This user does not exist'
@@ -99,7 +91,7 @@ class UserProfile extends Component {
 
     handleSelect = (selectedKey) => {
         this.setState({ currentView: selectedKey })
-        if (selectedKey == 'posts')
+        if (selectedKey === 'posts')
             this.props.history.push('/' + this.state.username)
         else
             this.props.history.push('/' + this.state.username + '/' + selectedKey)
@@ -143,7 +135,8 @@ class UserProfile extends Component {
                 }
                 this.setState({
                     followerCount: res.user.followers,
-                    followingCount: res.user.following
+                    followingCount: res.user.following,
+                    currentView: this.state.currentView ? this.state.currentView : 'posts'
                 })
             })
             .catch(error => console.error(error))
@@ -156,7 +149,7 @@ class UserProfile extends Component {
             fetch(url, { credentials: 'include' })
                 .then(response => response.json())
                 .then(res => {
-                    if (res.username == this.state.username)
+                    if (res.username === this.state.username)
                         this.setState({ isFollowing: null })
                     else
                         this.setState({ currentUser: res.username }, this.setFollowState)
@@ -208,7 +201,6 @@ class UserProfile extends Component {
 
     setFollowState = () => {
         if (!this.state.followButtonUpdated && this.state.currentUser && this.state.followers) {
-            console.log('setFollowState')
             this.setState({
                 isFollowing: this.state.followers.includes(this.state.currentUser),
                 followButtonUpdated: true

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Nav } from 'react-bootstrap';
-import { LinkContainer, Link } from "react-router-bootstrap";
+import { LinkContainer } from "react-router-bootstrap";
 import './../css/tweet.css';
 
 class Tweet extends Component {
@@ -49,8 +49,8 @@ class Tweet extends Component {
   }
 
   convertTs = (ts) => {
-    var ts = new Date(Math.round(ts * 1000));
-    return ts.toLocaleString();
+    var date = new Date(Math.round(ts * 1000));
+    return date.toLocaleString();
   }
 
   handleLike = () => {
@@ -64,7 +64,7 @@ class Tweet extends Component {
   }
 
   createMentionLinks = (text) => {
-    const regexp = RegExp('@([a-z\d_\[0-9]+)', 'gi')
+    const regexp = RegExp('@([a-zd_[0-9]+)', 'gi')
     const str = this.state.content
     let matches = str.matchAll(regexp)
     var components = []
@@ -75,7 +75,7 @@ class Tweet extends Component {
       components.push(<LinkContainer className='profileLink' to={'/' + match[1]} key={match.index}><Nav.Link>{match[0]}</Nav.Link></LinkContainer>)
       lastMentionEndIndex = match.index + match[0].length
     }
-    if (lastMentionEndIndex != str.length) 
+    if (lastMentionEndIndex !== str.length) 
       components.push(str.substring(lastMentionEndIndex))
 
     return <>{components}</>

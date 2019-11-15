@@ -1,5 +1,5 @@
 import React, {Component} from  'react';
-import {Form, Alert, Button, Container} from 'react-bootstrap';
+import {Form, Button, Container} from 'react-bootstrap';
 
 class Post extends Component{
   state = {
@@ -34,7 +34,7 @@ class Post extends Component{
     })
       .then( res => res.json())
       .then(response => {
-         if(response.status=="OK"){
+         if(response.status === "OK"){
             alert("Item ID: " + response.id);
          }else{
             alert(response.error);

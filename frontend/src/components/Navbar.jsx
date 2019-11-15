@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Navbar, Nav, DropdownButton, Dropdown, Button } from "react-bootstrap";
+import { Navbar, Nav, DropdownButton, Dropdown } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { withRouter } from 'react-router-dom';
 import Cookies from 'js-cookie';
