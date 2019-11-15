@@ -101,7 +101,6 @@ class SearchModal extends Component {
 
     handleSubmit = e => {
         e.preventDefault();
-        const { history } = this.props
         const url = API + '/search'
         var payload = {}
         for (let s in this.state) {

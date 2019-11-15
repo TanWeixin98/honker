@@ -42,10 +42,16 @@
 .tweet_content{
    padding-right: 30px;
    padding-left: 30px;
+   white-space: pre-line;
 }
 
 .user_thumbnail{
    width : 80px;
    height: 80px;
    padding: 15px 15px 15px 15px;
+}
+
+.profileLink{
+  display: inline;
+  padding: 0;
 }

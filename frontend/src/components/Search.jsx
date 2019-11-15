@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Form, Container, Button, Row } from 'react-bootstrap'
+import Tweet from './Tweet'
 
 class Search extends Component {
     state = {
@@ -14,7 +15,14 @@ class Search extends Component {
     }
 
     render = () => {
-        var searchResults = this.state.posts ? this.state.posts.map(post => { return <div key={post._id}>{post.username}: "{post.content}"</div> }) : undefined
+        var searchResults = this.state.posts ? this.state.posts.map(post => {
+            return <Tweet key={post._id}
+                username={post.username}
+                tweet_id={post.id}
+                content={post.content}
+                time={post.timestamp}
+                likes={post.likes} />
+        }) : undefined
         return (
             <div>
                 <h1>Search results</h1>

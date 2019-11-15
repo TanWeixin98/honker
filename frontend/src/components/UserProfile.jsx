@@ -3,6 +3,7 @@ import API from '../constants'
 import '../css/UserProfile.css'
 import { Container, Col, Row, Nav, Button } from 'react-bootstrap';
 import UserList from './UserList'
+import Tweet from './Tweet'
 
 const initialState = {
     username: null,
@@ -10,10 +11,12 @@ const initialState = {
     followingCount: null,
     followers: null,
     following: null,
-    currentView: 'Posts',
+    posts: null,
+    currentView: 'posts',
     isFollowing: false,
     currentUser: null,
-    followButtonUpdated: false
+    followButtonUpdated: false,
+    error: false
 }
 
 class UserProfile extends Component {
@@ -22,7 +25,7 @@ class UserProfile extends Component {
         super(props)
         this.state = initialState
         this.state.username = this.props.match.params.username
-        this.state.currentView = this.props.match.params.view
+        if (this.props.match.params.view) this.state.currentView = this.props.match.params.view
         this.setUserState()
     }
 
@@ -46,19 +49,30 @@ class UserProfile extends Component {
             </Button>
 
         var userView
-        switch(this.state.currentView){
-            case 'posts':
-                userView = 'Posts'
-                break
-            case 'followers':
-                userView = <UserList userList={this.state.followers} username={this.state.username} view='Followers'/>
-                break
-            case 'following':
-                userView = <UserList userList={this.state.following} username={this.state.username} view='Following'/>
-                break
-            default:
-                userView = <div/>
-        }
+        if (!this.state.error)
+            switch (this.state.currentView) {
+                case 'posts':
+                    userView = this.state.posts ?
+                        this.state.posts.map(post => {
+                            return <Tweet key={post._id}
+                                username={post.username}
+                                tweet_id={post.id}
+                                content={post.content}
+                                time={post.timestamp}
+                                likes={post.likes} />
+                        }) : 'This user has not posted anything'
+                    break
+                case 'followers':
+                    userView = <UserList userList={this.state.followers} username={this.state.username} view='Followers' />
+                    break
+                case 'following':
+                    userView = <UserList userList={this.state.following} username={this.state.username} view='Following' />
+                    break
+                default:
+                    userView = 'Posts'
+            }
+        else
+            userView = 'This user does not exist'
 
         return (
             <Container className='UserProfileContainer'>
@@ -69,8 +83,8 @@ class UserProfile extends Component {
                             {followButton}
                             <br />
                             <Nav.Link eventKey="posts">Posts</Nav.Link>
-                            <Nav.Link eventKey="followers">Followers ({this.state.followerCount})</Nav.Link>
-                            <Nav.Link eventKey="following">Following ({this.state.followingCount})</Nav.Link>
+                            <Nav.Link eventKey="followers">Followers{this.state.followerCount ? ` (${this.state.followerCount})` : ''}</Nav.Link>
+                            <Nav.Link eventKey="following">Following{this.state.followingCount ? ` (${this.state.followingCount})` : ''}</Nav.Link>
                         </Nav>
                     </Col>
                     <Col>
@@ -85,13 +99,14 @@ class UserProfile extends Component {
 
     handleSelect = (selectedKey) => {
         this.setState({ currentView: selectedKey })
-        if(selectedKey == 'posts')
+        if (selectedKey == 'posts')
             this.props.history.push('/' + this.state.username)
         else
             this.props.history.push('/' + this.state.username + '/' + selectedKey)
     }
 
     handleFollow = () => {
+        if (this.state.error) return
         var url = API + '/follow'
         fetch(url, {
             method: 'POST',
@@ -111,15 +126,21 @@ class UserProfile extends Component {
     setUserState = () => {
         this.getCurrentUser()
         this.getUser()
+        this.getPosts()
         this.getFollowers()
         this.getFollowing()
     }
 
     getUser = () => {
+        if (this.state.error) return
         var url = API + '/user/' + this.state.username
         fetch(url, { credentials: 'include' })
             .then(response => response.json())
             .then(res => {
+                if (res.error) {
+                    this.setState({ error: true })
+                    return
+                }
                 this.setState({
                     followerCount: res.user.followers,
                     followingCount: res.user.following
@@ -129,8 +150,8 @@ class UserProfile extends Component {
     }
 
     getCurrentUser = () => {
+        if (this.state.error) return
         return new Promise((resolve) => {
-            console.log('getCurrentUser')
             const url = API + '/currentUser'
             fetch(url, { credentials: 'include' })
                 .then(response => response.json())
@@ -146,6 +167,7 @@ class UserProfile extends Component {
     }
 
     getFollowers = () => {
+        if (this.state.error) return
         var url = API + '/user/' + this.state.username + '/followers'
         fetch(url)
             .then(response => response.json())
@@ -156,6 +178,7 @@ class UserProfile extends Component {
     }
 
     getFollowing = () => {
+        if (this.state.error) return
         var url = API + '/user/' + this.state.username + '/following'
         fetch(url)
             .then(response => response.json())
@@ -163,6 +186,24 @@ class UserProfile extends Component {
                 this.setState({ following: res.users })
             })
             .catch(error => console.error(error))
+    }
+
+    getPosts = () => {
+        if (this.state.error) return
+        const url = API + '/search'
+        var payload = { username: this.state.username, following: false }
+
+        fetch(url, {
+            method: "POST",
+            body: JSON.stringify(payload),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+            .then(res => res.json())
+            .then(response => {
+                this.setState({ posts: response.items })
+            })
     }
 
     setFollowState = () => {
