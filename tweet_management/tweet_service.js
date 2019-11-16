@@ -100,6 +100,35 @@ amqp.connect(amqp_url, function(connection_err, connection){
             });
         });
 
+        //like 
+        channel.assertQueue('like_item', {durable: false}, function(like_err, like_queue){
+            if(like_err){
+                logger.error("Assert like queue failed.", like_err)
+                return;
+            }
+            logger.info("Assert like queue success");
+
+            channel.bindQueue(like_queue.queue, exchange, 'like_tweet');
+            channel.consume(like_queue.queue, function(msg){
+                var payload_str = msg.content.toString();
+                var payload = JSON.parse(payload_str);
+                like_item(payload, function(err){
+                    var res = {};
+                    if(err){
+                        logger.error("Failed to like" + payload_str, err);
+                        res = {"status" : "error", "error" : "failed to like tweet " + payload.id };
+                    }else{
+                        logger.info("Item liked: " + payload_str);
+                        res = {"status" : "OK"};
+                    }
+
+                    res = JSON.stringify(res);
+                    channel.sendToQueue(msg.properties.replyTo, Buffer.from(res), {correlationId : msg.properties.correlationId});
+                    channel.ack(msg);
+                });
+            });
+        });
+
         //search
         channel.assertQueue('search_item', {durable: false}, function(search_err, search_queue){
             if(search_err){
@@ -191,10 +220,30 @@ function search_item(id, options, callback){
             return callback(null, result);
         });
     }else{
-        var query = {'id': id};
+        var query = {id: id};
         mongodb.search("tweet", query, options.projections, 1 , {}, function(err, result){
             if(err) return callback(err, null);
             return callback(null, result[0]);
         });
     }
+}
+
+function like_item(payload, callback){
+    var query = {id : payload.id};
+    var projections = {_id : 0, property : 1} 
+    mongodb.search("tweet", query, projections, 1, {}, function(err, result){
+      if(err) return callback(null, err);
+
+      var likes = result[0].property.likes;
+      if(payload.like){
+          likes += 1;
+      }else{
+          likes -= 1;
+      }
+      logger.info(payload.id + " liked: "+ payload.like + ". Current likes: " + likes);
+      mongodb.update("tweet", query, {property: {likes: likes}}, function(err, result){
+        if(err) return callback(err)
+        else return callback(null)
+      })
+    })    
 }

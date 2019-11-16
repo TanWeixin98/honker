@@ -192,4 +192,21 @@ app.get('/item/:id', (req, res, next) => {
         .then((response) => utils.send_response(res, response));
 });
 
+app.post('/item/:id/like', (req, res, next) => {
+    var username = cookies.readAuthToken(req.signedCookies);
+    if(!request_checker.verify(username, res)) return;
+    var like = req.body.like;
+    var id = req.params.id;
+
+    if(like === undefined)
+      like = true;
+    else if(typeof like !== 'boolean'){
+      utils.send_response(res, {"status":"error" , "error":"Like is not boolean"});
+      return;
+    }
+
+    messenger.sendRPCMessage(JSON.stringify({id : id , like: like}), "", "like_item")
+            .then((response) => utils.send_response(res,response));
+});
+
 app.get('*', (req, res) => { res.sendFile('index.html', {root: path.resolve(__dirname, '../../frontend/build')}) });

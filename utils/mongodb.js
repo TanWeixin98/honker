@@ -37,6 +37,13 @@ module.exports = {
     });
   },
 
+  update : function(collection_name, query, update_values, callback){
+    mongodb.collection(collection_name).updateOne(query, {$set: update_values},function(err,result){
+      if(err) return callback(err);
+      return callback(null);
+    });
+  },
+
   search : function(collection_name, query, projections, max=1,sort_rule={}, callback){
     mongodb.collection(collection_name).find(query, {projection:projections}).sort(sort_rule).limit(max).toArray(function(err, result){
       if(err) return callback(err, null);
