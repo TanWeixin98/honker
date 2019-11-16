@@ -62,6 +62,11 @@ amqp.connect(amqp_url, function(connection_err, connection){
                     }else{
                         logger.info("Item added: " + payload_str);
                         res = {"status" : "OK", "id" : payload.id};
+                        if(payload.childType == "retweet"){
+                          update_retweet_number(payload.parent, function(err){
+                            if(err) logger("Failed to update retweet number");
+                          })
+                        }
                     }
 
                     res = JSON.stringify(res);
@@ -228,9 +233,26 @@ function search_item(id, options, callback){
     }
 }
 
+function update_retweet_number(parent_id, callback){
+    var query = {id : parent_id};
+    var projections = {_id : 0, retweeted: 1};
+
+    mongodb.search("tweet", query, projections, 1, {}, function(err, result){
+      if(err) return callback(null, err);
+
+      var retweet_number = result[0].retweeted;
+      retweet_number += 1;
+      logger.info(parent_id + "retweeted. " + "Current retweet number is " + retweet_number);
+      mongodb.update("tweet", query, {retweeted : retweet_number}, function(err, result){
+        if(err) return callback(err);
+        else return callback(null);
+      });
+    });
+}
+
 function like_item(payload, callback){
     var query = {id : payload.id};
-    var projections = {_id : 0, property : 1} 
+    var projections = {_id : 0, property : 1};
     mongodb.search("tweet", query, projections, 1, {}, function(err, result){
       if(err) return callback(null, err);
 
