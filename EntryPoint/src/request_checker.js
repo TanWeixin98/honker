@@ -9,7 +9,7 @@ module.exports = {
 
     verify : function(username, res){
         if(!username){
-            res.statusCode = 500;
+            res.statusCode = 401;
             res.json({"status":"error", "error":"Not log in"});
             return false;
         }
