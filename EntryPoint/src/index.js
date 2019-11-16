@@ -72,6 +72,13 @@ app.post('/logout', (req, res, next) => {
 });
 
 // UserAPI -Brian
+
+app.get('/currentUser', (req, res, next) => {
+    var username = cookies.readAuthToken(req.signedCookies);
+    if(username == null) cookies.clearAuthToken(req, res, next);
+    res.json({ username: username });
+});
+
 app.get('/user/:username', (req, res, next) => {
     messenger.sendRPCMessage(JSON.stringify({username: req.params.username}), 'getUser', 'UserAPI')
         .then((response) => res.json(response));
@@ -128,7 +135,6 @@ app.post('/additem', (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     var username = cookies.readAuthToken(req.signedCookies);
     if(!request_checker.verify(username,res)) return;
-
     var json = request_checker.add_item_check(req.body, username);
     if(utils.send_response(res, json) == true) return;
     json['username'] = username;
@@ -164,11 +170,17 @@ app.post('/search', (req, res, next) => {
               var following_list = (response.status == 'OK') ?response.users :[];
               json['following_list'] = following_list;
               messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
-                  .then((response) => utils.send_response(res, response));
-        });
+                    .then((response) => {
+                        response.currentUser = username;
+                        utils.send_response(res, response)
+                    });
+            });
     }else{
         messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
-            .then((response) => utils.send_response(res, response));
+            .then((response) => {
+                response.currentUser = username;
+                utils.send_response(res, response)
+            });
     }
 });
 
