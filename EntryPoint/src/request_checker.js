@@ -18,12 +18,16 @@ module.exports = {
 
     add_item_check: function(req, username){
         var content = req.content;
+        var tweet_parent = req.parent;
         var childType = req.childType;
         var validType = ["retweet", "reply"];
         if(childType != null && validType.indexOf(childType) == -1){
             return {"status":"error", "error":"Invalid childType"};
         }else if(content === undefined){
             return {"status": "error", "error":"No content"};
+        }
+        if(tweet_parent !== undefined){
+            req['parent'] = tweet_parent;
         }
         var id = uuidv4();
         req['id'] = id;
