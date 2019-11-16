@@ -9,7 +9,7 @@ import {
 import NavBar from './components/Navbar'
 import UserAuth from './components/UserAuth'
 import Verify from './components/Verify'
-import Post from './components/Post'
+import PostItem from './components/PostItem'
 import Tweets from './components/Tweets'
 import ById from './components/ById'
 import UserProfile from './components/UserProfile'
@@ -25,7 +25,7 @@ function App() {
                         <Route exact path='/' component={HomePage}/>
                         <Route path='/login' component={UserAuth}/>
                         <Route path='/verify' component={Verify}/>
-                        <Route path='/post' component={Post}/>
+                        <Route path='/post' component={PostItem}/>
                         <Route path='/tweets' component={Tweets}/>
                         <Route path='/search' component={PostList}/>
                         <Route path='/byid' component={ById}/>

@@ -116,6 +116,7 @@ class SearchModal extends Component {
         fetch(url, {
             method: "POST",
             body: JSON.stringify(payload),
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json"
             }
@@ -125,7 +126,7 @@ class SearchModal extends Component {
                 this.handleClose()
                 this.props.history.push({
                     pathname: '/search',
-                    state: { posts: response.items, usage: 'Search Results' }
+                    state: { posts: response.items, usage: 'Search Results', currentUser: response.currentUser }
                 });
 
             })

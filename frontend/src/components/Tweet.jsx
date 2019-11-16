@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Nav } from 'react-bootstrap';
+import { Container, Row, Col, Nav, Button } from 'react-bootstrap';
 import { LinkContainer } from "react-router-bootstrap";
 import './../css/tweet.css';
 
@@ -13,11 +13,13 @@ class Tweet extends Component {
       likes: this.props.likes,
       liked: false,
       time: this.props.time,
-      content: this.props.content
+      content: this.props.content,
+      currentUser: this.props.currentUser
     }
   }
 
   render() {
+    var deleteButton = this.state.currentUser === this.state.username ? <Button size="sm" variant="danger">Delete Post</Button> : undefined
     return (
       <Container className='Tweet'>
         <Row>
@@ -40,8 +42,9 @@ class Tweet extends Component {
         </Row>
         <Row>
           <div className='likes_and_retweet'>
-            <button className='btn-xs btn-primary like_btn' onClick={this.handleLike}><i className="fa fa-thumbs-up">{this.state.likes}Likes</i></button>
-            <button className='btn-xs btn-primary tweet_btn'>Retweet</button>
+            <Button className='like_btn' onClick={this.handleLike} size="sm"><i className="fa fa-thumbs-up">{this.state.likes}Likes</i></Button>
+            <Button className='tweet_btn' size="sm">Retweet</Button>
+            {deleteButton}
           </div>
         </Row>
       </Container>

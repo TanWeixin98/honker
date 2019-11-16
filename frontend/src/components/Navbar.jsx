@@ -37,8 +37,7 @@ class NavBar extends Component {
     }
 
     return (
-      <>
-      {searchModal}
+      
       <Navbar
         bg="light"
         expand="lg"
@@ -62,8 +61,8 @@ class NavBar extends Component {
           {loginButton}
           {userDropdown}
         </Navbar.Collapse>
+        {searchModal}
       </Navbar>
-      </>
     );
   }
 

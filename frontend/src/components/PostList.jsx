@@ -5,14 +5,17 @@ class PostList extends Component {
     
     state = {
         posts: null,
-        usage: undefined
+        usage: undefined,
+        currentUser: null
     }
 
     static getDerivedStateFromProps(nextProps) {
-        if (nextProps.location && nextProps.location.state)
-            return { posts: nextProps.location.state.posts, usage: nextProps.location.state.usage }
+        if (nextProps.location && nextProps.location.state){
+            let newState = nextProps.location.state
+            return { posts: newState.posts, usage: newState.usage, currentUser: newState.currentUser }
+        }
         else if (nextProps)
-            return { posts: nextProps.posts, usage: nextProps.usage }
+            return { posts: nextProps.posts, usage: nextProps.usage, currentUser: nextProps.currentUser }
         else
             return null
     }
@@ -24,7 +27,8 @@ class PostList extends Component {
                 tweet_id={post.id}
                 content={post.content}
                 time={post.timestamp}
-                likes={post.likes} />
+                likes={post.likes} 
+                currentUser={this.state.currentUser}/>
         }) : <div style={{ textAlign: "center" }}>No honks found</div>
 
         return (

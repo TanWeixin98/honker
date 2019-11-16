@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import API from '../constants'
 import '../css/UserProfile.css'
 import { Container, Col, Row, Nav, Button } from 'react-bootstrap';
+import { Link } from 'react-router-dom'
 import UserList from './UserList'
 import PostList from './PostList';
 
@@ -30,8 +31,12 @@ class UserProfile extends Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.match.params.username !== prevState.username)
+        if (nextProps.match.params.username !== prevState.username){
             return { ...initialState, username: nextProps.match.params.username }
+        }
+        else if(nextProps.match.params.view !== prevState.currentView){
+            return { currentView: nextProps.match.params.view ? nextProps.match.params.view : 'posts' }
+        }
         else
             return null;
     }
@@ -52,7 +57,7 @@ class UserProfile extends Component {
         if (!this.state.error)
             switch (this.state.currentView) {
                 case 'posts':
-                    userView = <PostList posts={this.state.posts}/>
+                    userView = <PostList posts={this.state.posts} currentUser={this.state.currentUser}/>
                     break
                 case 'followers':
                     userView = <UserList userList={this.state.followers} username={this.state.username} view='Followers' />
@@ -70,13 +75,13 @@ class UserProfile extends Component {
             <Container className='UserProfileContainer'>
                 <Row>
                     <Col className='UserProfileCol'>
-                        <Nav className="flex-column" onSelect={this.handleSelect}>
+                        <Nav className="flex-column">
                             <h2 className='centered'>@{this.state.username}</h2>
                             {followButton}
                             <br />
-                            <Nav.Link eventKey="posts">Posts</Nav.Link>
-                            <Nav.Link eventKey="followers">Followers{this.state.followerCount ? ` (${this.state.followerCount})` : ''}</Nav.Link>
-                            <Nav.Link eventKey="following">Following{this.state.followingCount ? ` (${this.state.followingCount})` : ''}</Nav.Link>
+                            <Link to={'/' + this.state.username} eventkey="posts" replace>Posts</Link>
+                            <Link to={'/' + this.state.username + '/followers'} replace>Followers{this.state.followerCount ? ` (${this.state.followerCount})` : ''}</Link>
+                            <Link to={'/' + this.state.username + '/following'} replace>Following{this.state.followingCount ? ` (${this.state.followingCount})` : ''}</Link>
                         </Nav>
                     </Col>
                     <Col>
@@ -90,11 +95,11 @@ class UserProfile extends Component {
     }
 
     handleSelect = (selectedKey) => {
-        this.setState({ currentView: selectedKey })
-        if (selectedKey === 'posts')
-            this.props.history.push('/' + this.state.username)
-        else
-            this.props.history.push('/' + this.state.username + '/' + selectedKey)
+        // this.setState({ currentView: selectedKey })
+        // if (selectedKey !== 'posts')
+        // //     this.props.history.push('/' + this.state.username)
+        // // else
+        //     this.props.history.push('/' + this.state.username + '/' + selectedKey)
     }
 
     handleFollow = () => {
@@ -189,13 +194,14 @@ class UserProfile extends Component {
         fetch(url, {
             method: "POST",
             body: JSON.stringify(payload),
+            credentials: "include",
             headers: {
                 "Content-Type": "application/json"
             }
         })
             .then(res => res.json())
             .then(response => {
-                this.setState({ posts: response.items })
+                this.setState({ posts: response.items, currentUser: response.currentUser })
             })
     }
 
