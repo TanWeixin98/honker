@@ -77,9 +77,10 @@ module.exports = {
     
     if(!Number.isFinite(ts) || !Number.isInteger(limit))
       return {"status":"error" , "error":"Either ts or limit is not type int."};
-    else if(limit < 1 || limit > 100)
-      return {"status":"error", "error":"limit is either less than 1 or greater than 100."}
-    
+    else if(limit < 1)
+      limit = 25;
+    else if(limit > 100)
+      limit = 100;
     if(login_username != null){
       if(following)
         msg_json["login_username"] = login_username;
