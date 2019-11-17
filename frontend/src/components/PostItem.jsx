@@ -29,7 +29,8 @@ class PostItem extends Component {
                             <Form.Group controlId="content">
                                 <Form.Control as="textarea" rows="3"
                                               onChange={this.handleChange}
-                                              placeholder="What do you want to honk about?"/>
+                                              placeholder="What do you want to honk about?">
+                                </Form.Control>
                             </Form.Group>
                         </Form>
                     </Modal.Body>

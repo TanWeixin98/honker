@@ -5,6 +5,8 @@ import Likes from "./Likes";
 import {toast} from 'react-toastify';
 import './../css/tweet.css';
 import API from "../constants";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faReply, faTrash} from '@fortawesome/free-solid-svg-icons'
 
 class Tweet extends Component {
 
@@ -24,7 +26,9 @@ class Tweet extends Component {
 
     render() {
         var deleteButton = this.state.currentUser === this.state.username ?
-            <Button size="sm" variant="danger" onClick={this.handleShow}>Delete Post</Button> : undefined
+            <Button size="sm" variant="outline-*" onClick={this.handleShow}>
+                <FontAwesomeIcon icon={faTrash} color={'grey'}/>
+            </Button> : undefined
         return (
             <>
                 <Modal show={this.state.showDeleteConfirm} onHide={this.handleClose} size={'lg'}>
@@ -61,6 +65,9 @@ class Tweet extends Component {
                     <Row className='postActionRow'>
                         <div className='postActionPanel'>
                             <Likes likes={this.state.likes} id={this.state.id}/>
+                            <Button variant={'outline-*'}>
+                                <FontAwesomeIcon icon={faReply} color={'grey'}/>
+                            </Button>
                             {deleteButton}
                         </div>
                     </Row>
@@ -95,19 +102,16 @@ class Tweet extends Component {
 
     deletePost = () => {
         const url = API + `/item/${this.state.id}`
-        console.log(url)
-
         fetch(url, {
             method: "DELETE",
             credentials: "include"
         })
             .then(res => {
-                console.log(res)
-                if (res.status != 200)
+                if (res.status !== 200)
                     toast.error(res.error)
-                else {
-                }
-                this.props.deleteHandler(this.props.index)
+                else
+                    this.props.deleteHandler(this.props.index)
+
             })
             .catch(err => {
                 console.log(err)

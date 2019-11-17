@@ -24,12 +24,14 @@ class Likes extends Component {
     }
 
     render() {
+        const space = this.state.numLikes ? <>&nbsp;&nbsp;</> : '';
         return (
             <Button variant="outline-*" onClick={this.handleClick}>
                 <FontAwesomeIcon icon={faHeart} color={this.state.liked ? activeColor : unactiveColor}/>
-                &nbsp;&nbsp;
-                <strong
-                    style={{color: this.state.liked ? activeColor : unactiveColor}}>{this.state.numLikes ? this.state.numLikes : ''}</strong>
+                <strong style={{color: this.state.liked ? activeColor : unactiveColor}}>
+                    {space}
+                    {this.state.numLikes ? this.state.numLikes : ''}
+                </strong>
             </Button>
         );
     }

@@ -44,7 +44,7 @@ class PostList extends Component {
 
     removePost = (index) => {
         this.setState(prevState => {
-            return {posts: prevState.posts.splice(index,1)}
+            return {posts: prevState.posts.splice(index, 1)}
         })
         toast.success('Honk deleted')
     }

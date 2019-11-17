@@ -46,7 +46,6 @@ class UserProfile extends Component {
 
     render() {
         var followButton
-        console.log(this.state.followButtonUpdated)
         if (this.state.followButtonUpdated && this.state.username !== this.state.currentUser)
             followButton = <Button onClick={this.handleFollow}
                                    style={{visibility: (this.state.isFollowing == null ? 'hidden' : 'visible')}}>
