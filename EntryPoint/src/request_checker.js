@@ -23,12 +23,15 @@ module.exports = {
         var validType = ["retweet", "reply"];
         if(childType != null && validType.indexOf(childType) == -1){
             return {"status":"error", "error":"Invalid childType"};
-        }else if(content === undefined){
-            return {"status": "error", "error":"No content"};
-        }
-        if(tweet_parent !== undefined){
+        }else{
+            if(tweet_parent === undefined)
+                return {"status" : "error", "error" : "Reply or Retweeted Post Without Parent Id"};
             req['parent'] = tweet_parent;
         }
+        if(content === undefined){
+            return {"status": "error", "error":"No content"};
+        }
+        
         var id = uuidv4();
         req['id'] = id;
         req['username'] = username;
