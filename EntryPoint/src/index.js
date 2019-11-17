@@ -207,7 +207,7 @@ app.post('/item/:id/like', (req, res, next) => {
       return;
     }
 
-    messenger.sendRPCMessage(JSON.stringify({id : id , like: like}), "", "like_item")
+    messenger.sendRPCMessage(JSON.stringify({id : id , like: like, username: username}), "", "like_item")
             .then((response) => utils.send_response(res,response));
 });
 

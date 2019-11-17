@@ -126,7 +126,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
                         logger.info("Item liked: " + payload_str);
                         res = {"status" : "OK"};
                     }
-
+               
                     res = JSON.stringify(res);
                     channel.sendToQueue(msg.properties.replyTo, Buffer.from(res), {correlationId : msg.properties.correlationId});
                     channel.ack(msg);
@@ -147,16 +147,20 @@ amqp.connect(amqp_url, function(connection_err, connection){
                 var payload_str = msg.content.toString();
                 var payload = JSON.parse(payload_str);
 
-                if(payload.following_list !== undefined){
-                    var limit = payload.limit;
-                    payload.limit = 0;
-                }
-
+                var limit = payload.limit;
+                payload.limit = 0;
+                
+                if(payload.rank == 'interest')
+                  var sort_rule = {'interest': -1};
+                else
+                  var sort_rule = {'timestamp': -1}
+                console.log(sort_rule)
                 search_item(payload.id, {"timestamp" : payload.timestamp, 
                     "username": payload.username,
                     "limit" : payload.limit, 
                     "projections": {},
-                    "query" : payload.query}, 
+                    "query" : payload.query,
+                    "sort_rule": sort_rule}, 
                     function(err, result){
                         var res = {};
                         if(err){
@@ -175,19 +179,18 @@ amqp.connect(amqp_url, function(connection_err, connection){
                                 });
                             }
                             else if(Array.isArray(result)){
-                                res['items'] = result;
-                                console.log(result);
-                                console.log(payload.following_list);
-                                if(payload.following_list !== undefined){
-                                    res['items'] = utils.filter_tweets(result, payload.following_list, limit);  
-                                    console.log(res['items'])
-                                }
+                                var items = utils.filter_tweets(result, 
+                                                                payload.following_list, 
+                                                                payload.replies, 
+                                                                payload.parent_id, 
+                                                                payload.has_media,
+                                                                limit);  
+                                res['items'] = items;
                             }
                             else res['item'] = result;
                         }
 
                         res = JSON.stringify(res);
-                        console.log(res);
                         channel.sendToQueue(msg.properties.replyTo, Buffer.from(res), {correlationId: msg.properties.correlationId});
                         channel.ack(msg)
                     });
@@ -205,7 +208,6 @@ function add_item(payload, callback){
 
 function del_item(payload, callback){
     mongodb.remove("tweet", payload, function(del_err, obj){
-        console.log(obj.result.n)
         if(del_err) return callback(del_err) 
         if(obj.result.n != 1) return callback(new Error("cannot delete others post"));
         return callback(null);
@@ -219,14 +221,14 @@ function search_item(id, options, callback){
         if(options.query !== undefined){
             query['$text'] = {$search: options.query};
         }
-        mongodb.search("tweet", query, options.projections ,options.limit, {'timestamp': -1},function(err, result){
+        mongodb.search("tweet", query, options.projections ,options.limit, options.sort_rule,function(err, result){
             if(err && err.message == "No matches") return callback(null, []);
             if(err) return callback(err, null);
             return callback(null, result);
         });
     }else{
         var query = {id: id};
-        mongodb.search("tweet", query, options.projections, 1 , {}, function(err, result){
+        mongodb.search("tweet", query, options.projections, 1 , {_id: 0, interest: 0}, function(err, result){
             if(err) return callback(err, null);
             return callback(null, result[0]);
         });
@@ -235,37 +237,51 @@ function search_item(id, options, callback){
 
 function update_retweet_number(parent_id, callback){
     var query = {id : parent_id};
-    var projections = {_id : 0, retweeted: 1};
-
-    mongodb.search("tweet", query, projections, 1, {}, function(err, result){
-      if(err) return callback(null, err);
-
-      var retweet_number = result[0].retweeted;
-      retweet_number += 1;
-      logger.info(parent_id + "retweeted. " + "Current retweet number is " + retweet_number);
-      mongodb.update("tweet", query, {retweeted : retweet_number}, function(err, result){
+    var update_query = {$inc : {retweeted: 1, interest: 1}};
+    
+    mongodb.update("tweet", query, update_query, function(err, result){
         if(err) return callback(err);
         else return callback(null);
-      });
     });
 }
 
 function like_item(payload, callback){
     var query = {id : payload.id};
-    var projections = {_id : 0, property : 1};
+    var projections = {_id : 0, like_list : 1, property : 1, interest : 1};
+    var username = payload.username;
+
+
     mongodb.search("tweet", query, projections, 1, {}, function(err, result){
-      if(err) return callback(null, err);
+      if(err) return callack(err);
 
       var likes = result[0].property.likes;
+      var like_list = result[0].like_list;
+      var interest = result[0].interest;
+      var index = like_list.indexOf(username);
+      
       if(payload.like){
-          likes += 1;
+        if(index >= 0){
+          return callback(new Error("User Already Liked"));
+        }
+        likes += 1;
+        interest += 1;
+        like_list.push(username);
       }else{
-          likes -= 1;
+        if(index < 0){
+          return callback(new Error("User have no liked yet"));
+        }
+        likes -= 1;
+        interest -= 1;
+        like_list.splice(index, 1);
       }
-      logger.info(payload.id + " liked: "+ payload.like + ". Current likes: " + likes);
-      mongodb.update("tweet", query, {property: {likes: likes}}, function(err, result){
-        if(err) return callback(err)
-        else return callback(null)
-      })
-    })    
+      
+      var update_query = {$set: {property: {likes: likes},
+                                like_list : like_list,
+                                interest : interest}};
+      logger.info(payload.id + " liked: "+ payload.like + ". Current likes: " + likes + " current like list" + like_list);      
+      mongodb.update("tweet", query, update_query,function(err, result){
+        if(err) return callback(err);
+        else return callback(null);
+      });
+    })
 }
