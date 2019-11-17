@@ -1,8 +1,8 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import API from '../constants'
 import '../css/UserProfile.css'
-import { Container, Col, Row, Nav, Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom'
+import {Container, Col, Row, Nav, Button} from 'react-bootstrap';
+import {Link} from 'react-router-dom'
 import UserList from './UserList'
 import PostList from './PostList';
 
@@ -31,13 +31,11 @@ class UserProfile extends Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.match.params.username !== prevState.username){
-            return { ...initialState, username: nextProps.match.params.username }
-        }
-        else if(nextProps.match.params.view !== prevState.currentView){
-            return { currentView: nextProps.match.params.view ? nextProps.match.params.view : 'posts' }
-        }
-        else
+        if (nextProps.match.params.username !== prevState.username) {
+            return {...initialState, username: nextProps.match.params.username}
+        } else if (nextProps.match.params.view !== prevState.currentView) {
+            return {currentView: nextProps.match.params.view ? nextProps.match.params.view : 'posts'}
+        } else
             return null;
     }
 
@@ -48,8 +46,10 @@ class UserProfile extends Component {
 
     render() {
         var followButton
+        console.log(this.state.followButtonUpdated)
         if (this.state.followButtonUpdated)
-            followButton = <Button onClick={this.handleFollow} style={{ visibility: (this.state.isFollowing == null ? 'hidden' : 'visible') }}>
+            followButton = <Button onClick={this.handleFollow}
+                                   style={{visibility: (this.state.isFollowing == null ? 'hidden' : 'visible')}}>
                 {this.state.isFollowing ? 'Unfollow' : 'Follow'}
             </Button>
 
@@ -60,10 +60,12 @@ class UserProfile extends Component {
                     userView = <PostList posts={this.state.posts} currentUser={this.state.currentUser}/>
                     break
                 case 'followers':
-                    userView = <UserList userList={this.state.followers} username={this.state.username} view='Followers' />
+                    userView =
+                        <UserList userList={this.state.followers} username={this.state.username} view='Followers'/>
                     break
                 case 'following':
-                    userView = <UserList userList={this.state.following} username={this.state.username} view='Following' />
+                    userView =
+                        <UserList userList={this.state.following} username={this.state.username} view='Following'/>
                     break
                 default:
                     userView = undefined
@@ -78,10 +80,12 @@ class UserProfile extends Component {
                         <Nav className="flex-column">
                             <h2 className='centered'>@{this.state.username}</h2>
                             {followButton}
-                            <br />
+                            <br/>
                             <Link to={'/' + this.state.username} eventkey="posts" replace>Posts</Link>
-                            <Link to={'/' + this.state.username + '/followers'} replace>Followers{this.state.followerCount ? ` (${this.state.followerCount})` : ''}</Link>
-                            <Link to={'/' + this.state.username + '/following'} replace>Following{this.state.followingCount ? ` (${this.state.followingCount})` : ''}</Link>
+                            <Link to={'/' + this.state.username + '/followers'}
+                                  replace>Followers{this.state.followerCount ? ` (${this.state.followerCount})` : ''}</Link>
+                            <Link to={'/' + this.state.username + '/following'}
+                                  replace>Following{this.state.followingCount ? ` (${this.state.followingCount})` : ''}</Link>
                         </Nav>
                     </Col>
                     <Col>
@@ -108,14 +112,20 @@ class UserProfile extends Component {
         fetch(url, {
             method: 'POST',
             credentials: 'include',
-            body: JSON.stringify({ username: this.state.username, follow: !this.state.isFollowing }),
+            body: JSON.stringify({username: this.state.username, follow: !this.state.isFollowing}),
             headers: {
                 "Content-Type": "application/json"
             }
         })
             .then(response => response.json())
             .then(res => {
-                this.setState({ isFollowing: !this.state.isFollowing })
+                if (res.status === 'OK')
+                    this.setState(prevState => {
+                        return {
+                            isFollowing: !prevState.isFollowing,
+                            followerCount: prevState.followerCount + (prevState.isFollowing ? -1 : 1)
+                        }
+                    })
             })
             .catch(error => console.error(error))
     }
@@ -131,11 +141,11 @@ class UserProfile extends Component {
     getUser = () => {
         if (this.state.error) return
         var url = API + '/user/' + this.state.username
-        fetch(url, { credentials: 'include' })
+        fetch(url, {credentials: 'include'})
             .then(response => response.json())
             .then(res => {
                 if (res.error) {
-                    this.setState({ error: true })
+                    this.setState({error: true})
                     return
                 }
                 this.setState({
@@ -151,13 +161,13 @@ class UserProfile extends Component {
         if (this.state.error) return
         return new Promise((resolve) => {
             const url = API + '/currentUser'
-            fetch(url, { credentials: 'include' })
+            fetch(url, {credentials: 'include'})
                 .then(response => response.json())
                 .then(res => {
                     if (res.username === this.state.username)
-                        this.setState({ isFollowing: null })
+                        this.setState({isFollowing: null})
                     else
-                        this.setState({ currentUser: res.username }, this.setFollowState)
+                        this.setState({currentUser: res.username}, this.setFollowState)
                 })
                 .catch(error => console.error(error))
         })
@@ -170,7 +180,7 @@ class UserProfile extends Component {
         fetch(url)
             .then(response => response.json())
             .then(res => {
-                this.setState({ followers: res.users }, this.setFollowState)
+                this.setState({followers: res.users}, this.setFollowState)
             })
             .catch(error => console.error(error))
     }
@@ -181,7 +191,7 @@ class UserProfile extends Component {
         fetch(url)
             .then(response => response.json())
             .then(res => {
-                this.setState({ following: res.users })
+                this.setState({following: res.users})
             })
             .catch(error => console.error(error))
     }
@@ -189,7 +199,7 @@ class UserProfile extends Component {
     getPosts = () => {
         if (this.state.error) return
         const url = API + '/search'
-        var payload = { username: this.state.username, following: false }
+        var payload = {username: this.state.username, following: false}
 
         fetch(url, {
             method: "POST",
@@ -201,14 +211,14 @@ class UserProfile extends Component {
         })
             .then(res => res.json())
             .then(response => {
-                this.setState({ posts: response.items, currentUser: response.currentUser })
+                this.setState({posts: response.items, currentUser: response.currentUser})
             })
     }
 
     setFollowState = () => {
         if (!this.state.followButtonUpdated && this.state.currentUser && this.state.followers) {
             this.setState({
-                isFollowing: this.state.followers.includes(this.state.currentUser),
+                isFollowing: this.state.currentUser !== this.state.username ? this.state.followers.includes(this.state.currentUser) : false,
                 followButtonUpdated: true
             })
         }
