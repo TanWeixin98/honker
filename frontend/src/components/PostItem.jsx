@@ -64,6 +64,7 @@ class PostItem extends Component {
             .then(response => {
                 if (response.status === "OK") {
                     toast.success('Your honk was submitted!')
+                    this.setState({ showModal: false })
                 } else {
                     toast.error(response.error)
                 }
