@@ -19,7 +19,7 @@ class PostItem extends Component {
                 <Modal
                     show={this.state.showModal}
                     onHide={this.handleClose}
-                    onEntered={() => document.getElementById("content").focus()}
+                    onEntered={() => document.getElementById("content").focus()} // Workaround since autoFocus didnt work :(
                     size='lg'>
                     <Modal.Header closeButton>
                         <Modal.Title>Honk</Modal.Title>
@@ -27,13 +27,14 @@ class PostItem extends Component {
                     <Modal.Body>
                         <Form>
                             <Form.Group controlId="content">
-                                <Form.Control as="textarea" rows="3" onChange={this.handleChange}
+                                <Form.Control as="textarea" rows="3"
+                                              onChange={this.handleChange}
                                               placeholder="What do you want to honk about?"/>
                             </Form.Group>
                         </Form>
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="primary" onClick={this.handleSubmit}>
+                        <Button onClick={this.handleSubmit}>
                             Submit
                         </Button>
                     </Modal.Footer>

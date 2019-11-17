@@ -42,10 +42,7 @@ class NavBar extends Component {
       <Navbar
         bg="light"
         expand="lg"
-        style={{
-          position: "relative",
-          top: "50%"
-        }}
+        sticky="top"
       >
         <LinkContainer to='/'>
           <Navbar.Brand>Honker</Navbar.Brand>

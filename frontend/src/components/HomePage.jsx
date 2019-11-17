@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, {Component} from 'react'
 import API from '../constants'
 import '../css/HomePage.css'
 import PostList from './PostList'
@@ -19,19 +19,19 @@ class HomePage extends Component {
     }
 
     render = () => {
-        var posts = this.state.hasFetched ? <PostList posts={this.state.posts} currentUser={this.state.currentUser}/> : ''
+        var posts = this.state.hasFetched ?
+            <PostList posts={this.state.posts} currentUser={this.state.currentUser}/> : ''
 
         return (
-            <div>
-                <hr />
+            <>
                 {posts}
-            </div>
+            </>
         )
     }
 
     fetchPosts = () => {
         const url = API + '/search'
-        var payload = { following: true }
+        var payload = {following: true}
 
         fetch(url, {
             method: "POST",
@@ -43,12 +43,12 @@ class HomePage extends Component {
         })
             .then(res => res.json())
             .then(response => {
-                this.setState({ posts: response.items, hasFetched: true, currentUser: response.currentUser })
+                this.setState({posts: response.items, hasFetched: true, currentUser: response.currentUser})
             })
     }
 
     handleRefresh = () => {
-        this.setState({ showPostSuccessToast: true })
+        this.setState({showPostSuccessToast: true})
         this.fetchPosts()
     }
 }

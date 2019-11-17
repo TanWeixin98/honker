@@ -1,57 +1,53 @@
-.Tweet{
-  background-color: AliceBlue;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  padding-bottom: 15px;
+.Tweet {
+    background-color: AliceBlue;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 15px;
 }
 
-.tweet_username{
-  margin-top: 20px;
+.tweet_username {
+    margin-top: 20px;
 }
 
-.tweet_username span{
-  font-size: large;
+.tweet_username span {
+    font-size: large;
 }
 
-.tweet_time{
+.tweet_time {
 }
 
-.tweet_time span{
-  font-size: x-small;
-  font-color:lightgray;
-  font-style: italic;
+.tweet_time span {
+    font-size: x-small;
+    font-color: lightgray;
+    font-style: italic;
 }
 
-.tweet_btn{
+.tweet_btn {
 }
 
-.like_btn{
-  
+.like_btn {
+
 }
 
-.likes_and_retweet *{
-  margin-left: 15px;
-  margin-right: 15px;
-}
-
-.likes_and_retweet{
-   padding-left: 15px;
+.postActionPanel {
+    padding-left: 30px;
+    padding-top: 10px;
 }
 
 
-.tweet_content{
-   padding-right: 30px;
-   padding-left: 30px;
-   white-space: pre-line;
+.tweet_content {
+    padding-right: 30px;
+    padding-left: 30px;
+    white-space: pre-line;
 }
 
-.user_thumbnail{
-   width : 80px;
-   height: 80px;
-   padding: 15px 15px 15px 15px;
+.user_thumbnail {
+    width: 80px;
+    height: 80px;
+    padding: 15px 15px 15px 15px;
 }
 
-.profileLink{
-  display: inline;
-  padding: 0;
+.profileLink {
+    display: inline;
+    padding: 0;
 }
