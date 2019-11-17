@@ -5,6 +5,7 @@ import { withRouter } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import API from "../constants";
 import SearchModal from './SearchModal'
+import PostItem from "./PostItem";
 
 class NavBar extends Component {
   state = {
@@ -49,9 +50,7 @@ class NavBar extends Component {
         <LinkContainer to='/'>
           <Navbar.Brand>Honker</Navbar.Brand>
         </LinkContainer>
-        <LinkContainer to='/post'>
-          <Nav.Link>Post Item</Nav.Link>
-        </LinkContainer>
+        <PostItem/>
         <SearchModal/>
         <LinkContainer to='/byid'>
           <Nav.Link>ByID</Nav.Link>

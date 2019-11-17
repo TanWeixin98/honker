@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
-import { Toast } from 'react-bootstrap'
 import API from '../constants'
+import '../css/HomePage.css'
 import PostList from './PostList'
-import PostItem from './PostItem'
 
 class HomePage extends Component {
 
@@ -10,7 +9,8 @@ class HomePage extends Component {
         posts: null,
         hasFetched: false,
         showPostSuccessToast: false,
-        currentUser: null
+        currentUser: null,
+        showAddPostModal: false
     }
 
     constructor(props) {
@@ -21,16 +21,8 @@ class HomePage extends Component {
     render = () => {
         var posts = this.state.hasFetched ? <PostList posts={this.state.posts} currentUser={this.state.currentUser}/> : ''
 
-
         return (
             <div>
-                {/* <Toast onClose={() => this.setState({ showPostSuccessToast: false })} show={this.state.showPostSuccessToast} showdelay={2000} autohide animation={true}>
-                    <Toast.Header>
-                        <strong className="mr-auto">Your Honk was submitted</strong>
-                    </Toast.Header>
-                    <Toast.Body>Woohoo, you're reading this text in a Toast!</Toast.Body>
-                </Toast> */}
-                <PostItem handleRefresh={this.handleRefresh} />
                 <hr />
                 {posts}
             </div>

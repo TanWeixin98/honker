@@ -1,54 +1,81 @@
-import React, { Component } from 'react';
-import { Form, Button, Container } from 'react-bootstrap';
+import React, {Component} from 'react';
+import {Form, Button, Modal, Nav} from 'react-bootstrap';
 import API from '../constants'
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 class PostItem extends Component {
-  state = {
-    content: "",
-    progress: 0,
-    showProgress: false
-  }
-  render() {
-    return (
-      <Container>
-        <Form onSubmit={this.handleSubmit}>
-          <Form.Group controlId="content">
-            <Form.Control as="textarea" rows="3" onChange={this.handleChange} />
-            <Form.Control.Feedback>Looks good!</Form.Control.Feedback>
-            <Button type="submit">Post</Button>
-          </Form.Group>
-        </Form>
-      </Container>
-    );
-  }
+    state = {
+        content: "",
+        progress: 0,
+        showProgress: false,
+        showModal: false
+    }
 
-  handleChange = e => {
-    e.preventDefault();
-    this.setState({ [e.target.id]: e.target.value });
-  }
+    render() {
+        return (
+            <>
+                <Nav.Link onClick={this.handleShow}>Honk</Nav.Link>
+                <Modal
+                    show={this.state.showModal}
+                    onHide={this.handleClose}
+                    onEntered={() => document.getElementById("content").focus()}
+                    size='lg'>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Honk</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form>
+                            <Form.Group controlId="content">
+                                <Form.Control as="textarea" rows="3" onChange={this.handleChange}
+                                              placeholder="What do you want to honk about?"/>
+                            </Form.Group>
+                        </Form>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="primary" onClick={this.handleSubmit}>
+                            Submit
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
+            </>
+        );
+    }
 
-  handleSubmit = e => {
-    e.preventDefault();
-    const url = API + '/additem'
-    fetch(url, {
-      method: "POST",
-      credentials: 'include',
-      body: JSON.stringify({content: this.state.content}),
-      headers: { "Content-Type": "application/json" }
-    })
-      .then(res => res.json())
-      .then(response => {
-        if (response.status === "OK") {
-          this.props.handleRefresh()
-          //alert("Item ID: " + response.id);
-        }
-        else {
-          alert(response.error);
-        }
-      });
-  }
+    handleShow = () => this.setState({showModal: true})
+    handleClose = () => this.setState({showModal: false})
+
+    handleChange = e => {
+        e.preventDefault();
+        this.setState({[e.target.id]: e.target.value});
+    }
+
+    handleSubmit = e => {
+        e.preventDefault();
+        const url = API + '/additem'
+        fetch(url, {
+            method: "POST",
+            credentials: 'include',
+            body: JSON.stringify({content: this.state.content}),
+            headers: {"Content-Type": "application/json"}
+        })
+            .then(res => res.json())
+            .then(response => {
+                if (response.status === "OK") {
+                    toast.success('Your honk was submitted!')
+                } else {
+                    toast.error(response.error)
+                }
+            });
+    }
 
 }
+
+toast.configure({
+    autoClose: 3000,
+    draggable: false,
+    position: toast.POSITION.BOTTOM_RIGHT
+})
 
 
 export default PostItem;
