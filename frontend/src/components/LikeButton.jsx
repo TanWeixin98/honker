@@ -3,13 +3,13 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {faHeart} from '@fortawesome/free-solid-svg-icons'
 import {Button} from "react-bootstrap"
 import {withRouter} from "react-router-dom"
-import "../css/Likes.css"
+import "../css/LikeButton.css"
 import API from "../constants"
 
 const activeColor = "#b3320e"
 const unactiveColor = "grey"
 
-class Likes extends Component {
+class LikeButton extends Component {
 
     state = {
         id: null,
@@ -73,4 +73,4 @@ class Likes extends Component {
 
 }
 
-export default withRouter(Likes);
+export default withRouter(LikeButton);

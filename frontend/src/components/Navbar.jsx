@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 import API from "../constants";
 import SearchModal from './SearchModal'
 import PostItem from "./PostItem";
+import {toast} from "react-toastify";
 
 class NavBar extends Component {
   state = {
@@ -80,9 +81,9 @@ class NavBar extends Component {
       .then(response => response.json())
       .then(res => {
         if (res.status === 'OK')
-          alert('You have logged out')
+          toast.success('You have logged out')
         else
-          alert(res.error)
+          toast.error(res.error)
         this.setState({ isAuthenticated: false })
         history.push('/')
       })

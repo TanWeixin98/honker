@@ -29,6 +29,10 @@ class PostList extends Component {
                           content={post.content}
                           time={post.timestamp}
                           likes={post.property.likes}
+                          retweeted={post.retweeted}
+                          parent={post.parent}
+                          type={post.childType}
+                          media={post.media}
                           currentUser={this.state.currentUser}
                           deleteHandler={this.removePost}
             />
