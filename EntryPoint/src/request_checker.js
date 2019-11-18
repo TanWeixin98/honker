@@ -21,6 +21,11 @@ module.exports = {
         var tweet_parent = req.parent;
         var childType = req.childType;
         var validType = ["retweet", "reply"];
+        var media = req.media;
+
+        if(media === undefined){
+            media =[];
+        }
         if(childType === undefined)
             childType = null
         if(childType != null && validType.indexOf(childType) == -1){
