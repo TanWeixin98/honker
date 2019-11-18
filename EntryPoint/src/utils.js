@@ -18,23 +18,46 @@ module.exports = {
     media_list.forEach(element => {
       promises.push(new Promise(function(resolve, reject){
          axios.delete(url + element)
-            .then( res => resolve(res))
-            .catch( err => reject(err));
+            .then( res => {
+                    resolve(res);
+            })
+            .catch( err =>{
+                    reject(err);
+            });
       })); 
     });
     return promises;
   },
 
-  //TODO : remove previously associated post
+  update_media_promises : function(){
+      var promises = [];
+      media_list.forEach(element =>{
+        promises.push(new Promise(function(resolve, reject){
+            axios.get(url+element)
+                .then(res => resolve(res))
+                .catch(err => reject(err))
+        
+        }));
+      });
+      return promises;
+  },
+
   lookup_media_promises : function(url, media_list){
     var promises = [];
     media_list.forEach(element =>{
       promises.push(new Promise(function(resolve, reject){
         axios.get(url + element)
-                .then(res => resolve(res))
-                .catch(err => reject(err));
+                .then(res => {
+                        rollback_list.push(element);
+                        resolve(res)
+                })
+                .catch(err =>{
+                        reject(err)
+                });
       }));
+    }, function(callback){
+       
     });
-    return promises;
+    return  promises;
   }
 }

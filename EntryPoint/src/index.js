@@ -147,11 +147,17 @@ app.post('/additem', (req, res, next) => {
 
     var base_url =  media_server + "/lookup/" + username + "/";
     var promises = utils.lookup_media_promises(base_url, json.media);
+                            
     Promise.all(promises)
             .then(() => {
-                     messenger.sendRPCMessage(JSON.stringify(json), "", "add_item")
-                            .then((response) => res.json(response));
-
+                  base_url = media_server + "/update/";
+                  promises = utils.update_media_promises(base_url, json.media);
+                  Promise.all(promises)
+                      .then(() => {
+                            messenger.sendRPCMessage(JSON.stringify(json), "", "add_item")
+                                .then((response) => res.json(response));
+                      })
+                      .catch(err => utils.send_response(res, {"status":"error", "error":"Update associtivity failed"}))
             })
             .catch(err =>{
                     utils.send_response(res, {"status":"error", "error":"Not all media has been uploaded"}); 

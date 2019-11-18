@@ -83,8 +83,7 @@ app.post('/media/:username', upload.any(), function(req, res){
 app.get('/lookup/:username/:id', function (req, res, next){ 
         var id = req.params.id;
         var username = req.params.username;
-
-        console.log(username)
+ 
         get_media_info(id)
                 .then(media => {
                     if(media.associate || media.poster != username){
@@ -92,17 +91,8 @@ app.get('/lookup/:username/:id', function (req, res, next){
                         res.statusCode = 500;
                         res.end();
                     }else{
-                        var query = {id:id};
-                        var update_value = {$set: {associate: true}};
-                        mongodb.update("media", query, update_value, function(err, result){
-                            if(err){
-                                    res.statusCode = 500;
-                                    logger.error("Db update for lookup: ", err);
-                            }
-                            else res.statusCode = 200;
-
-                            res.end();
-                        });
+                       res.statusCode = 200;
+                       res.end();
                     }
                 })
                 .catch(err => {
@@ -110,6 +100,19 @@ app.get('/lookup/:username/:id', function (req, res, next){
                     res.statusCode = 404;
                     res.end();
                 })
+});
+
+app.get('/update/:id', function(req, res, next){
+    var id = req.params.id;
+    
+    var query = {id:id};
+    var update_value = {$set: {associate: true}};
+    mongodb.update("media", query, update_value, function(err, result){
+        if(err){
+            res.statusCode = 500;
+        }else res.statusCode = 200;
+        res.end();
+    });
 });
 
 //get media in system
