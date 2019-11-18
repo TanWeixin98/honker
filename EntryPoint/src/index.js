@@ -234,7 +234,7 @@ app.post('/addmedia', (req, res, next) => {
       var username = cookies.readAuthToken(req.signedCookies);
       if(!request_checker.verify(username, res)) return;
 
-      var url = media_server + "/media";
+      var url = media_server + "/media/"+ username;
       req.pipe(request({url:url, json: true})).pipe(res);
 });
 
