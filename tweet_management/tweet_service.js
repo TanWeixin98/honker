@@ -230,7 +230,7 @@ function search_item(id, options, callback){
         });
     }else{
         var query = {id: id};
-        mongodb.search("tweet", query, options.projections, 1 , {_id: 0, interest: 0}, function(err, result){
+        mongodb.search("tweet", query,  {_id: 0, interest: 0}, 1 , {}, function(err, result){
             if(err) return callback(err, null);
             return callback(null, result[0]);
         });
