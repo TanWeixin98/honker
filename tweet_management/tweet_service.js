@@ -88,14 +88,14 @@ amqp.connect(amqp_url, function(connection_err, connection){
             channel.consume(remove_queue.queue, function(msg){
                 var payload_str = msg.content.toString();
                 var payload = JSON.parse(payload_str);
-                del_item(payload, function(err){
+                del_item(payload, function(err, media){
                     var res = {};
                     if(err){
                         logger.error("Failed to remove" + payload_str, err );
                         res = {"status": "error", "error":"failed to remove tweet"};
                     }else{
                         logger.info("Item removed: " + payload_str);
-                        res = {"status" :"OK", "id" : payload.id};
+                        res = {"status" :"OK", "media" : media};
                     }
 
                     res = JSON.stringify(res);
@@ -207,10 +207,12 @@ function add_item(payload, callback){
 }
 
 function del_item(payload, callback){
-    mongodb.remove("tweet", payload, function(del_err, obj){
-        if(del_err) return callback(del_err) 
-        if(obj.result.n != 1) return callback(new Error("cannot delete others post"));
-        return callback(null);
+    mongodb.search("tweet", payload, {_id: 0, media:1}, 1, {}, function(err, media){
+        mongodb.remove("tweet", payload, function(del_err, obj){
+            if(del_err) return callback(del_err, null) 
+            if(obj.result.n != 1) return callback(new Error("cannot delete others post"), null);
+            return callback(null, media[0].media);
+        });
     });
 }
 

@@ -25,16 +25,13 @@ module.exports = {
             childType = null
         if(childType != null && validType.indexOf(childType) == -1){
             return {"status":"error", "error":"Invalid childType"};
-        }else if(childType != null`){
+        }else if(childType != null){
             if(tweet_parent === undefined)
                 return {"status" : "error", "error" : "Reply or Retweeted Post Without Parent Id"};
             req['parent'] = tweet_parent;
         }
         if(content === undefined){
             return {"status": "error", "error":"No content"};
-        }
-        if(childType === undefined){
-          req['childType'] = null;
         }
 
         var id = uuidv4();

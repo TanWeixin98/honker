@@ -3,14 +3,20 @@ var cookieParser = require('cookie-parser');
 var cors = require('cors');
 var path = require('path');
 var pino = require('express-pino-logger')()
+var axios = require('axios');
+var request = require('request');
 
 var app = express();
 app.listen(8000, () => { console.log('EntryPoint is listening on port 8000'); });
 
 console.log(path.resolve(__dirname, '../../EntryPoint'));
 
+//TODO make json contain all ip and select from it
+// For now hardcode 
+var media_server = "http://localhost:9000"
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({limit: '50mb', extended: false,parameterLimit: 1000000 }));
 app.use(cookieParser('TeamLiquid :('));
 app.use(cors(
     {
@@ -138,11 +144,19 @@ app.post('/additem', (req, res, next) => {
     var json = request_checker.add_item_check(req.body, username);
     if(utils.send_response(res, json) == true) return;
     json['username'] = username;
-    //TODO: Check media id is valid
-    //
 
-    messenger.sendRPCMessage(JSON.stringify(json), "", "add_item")
-        .then((response) => res.json(response));
+    var base_url =  media_server + "/lookup/";
+    var promises = utils.lookup_media_promises(base_url, json.media);
+    Promise.all(promises)
+            .then(() => {
+                     messenger.sendRPCMessage(JSON.stringify(json), "", "add_item")
+                            .then((response) => res.json(response));
+
+            })
+            .catch(err =>{
+                    console.log(err)
+                    utils.send_response(res, {"status":"error", "error":"Not all media has been uploaded"}); 
+            })
 });
 
 app.delete('/item/:id', (req, res, next) => {
@@ -152,11 +166,17 @@ app.delete('/item/:id', (req, res, next) => {
     var id = req.params.id;
     messenger.sendRPCMessage(JSON.stringify({"id":id, "username": username}), "", "delete_item")
             .then((response) => {
-                if(response.status == 'OK')
-                    res.statusCode = 200;
-                else
+                if(response.status == 'OK'){
+                    var base_url = media_server + "/media/";
+                    var promise_list = utils.delete_media_promises(base_url, response.media);
+                    Promise.all(promise_list)
+                          .then(res => res.statusCode = 200)
+                          .catch(err => res.statusCode = 404)
+                          .finally(() => res.end());
+                }else{
                     res.statusCode = 444;
-                res.end();
+                    res.end();
+                }
             });
 });
 
@@ -209,6 +229,22 @@ app.post('/item/:id/like', (req, res, next) => {
 
     messenger.sendRPCMessage(JSON.stringify({id : id , like: like, username: username}), "", "like_item")
             .then((response) => utils.send_response(res,response));
+});
+
+app.post('/addmedia', (req, res, next) => {
+      var username = cookies.readAuthToken(req.signedCookies);
+      console.log(username)
+      if(!request_checker.verify(username, res)) return;
+
+      var url = media_server + "/media";
+      console.log(url)
+      req.pipe(request({url:url, json: true})).pipe(res);
+});
+
+app.get('/media/:id', (req, res, next) => {
+      var id = req.params.id;
+      var url = media_server + "/media/" + id;
+      request.get(url).pipe(res);
 });
 
 app.get('*', (req, res) => { res.sendFile('index.html', {root: path.resolve(__dirname, '../../frontend/build')}) });
