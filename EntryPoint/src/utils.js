@@ -18,15 +18,14 @@ module.exports = {
     media_list.forEach(element => {
       promises.push(new Promise(function(resolve, reject){
          axios.delete(url + element)
-            .then( res => {
-                    console.log(res.status);
-                    resolve(res)})
+            .then( res => resolve(res))
             .catch( err => reject(err));
       })); 
     });
     return promises;
   },
 
+  //TODO : remove previously associated post
   lookup_media_promises : function(url, media_list){
     var promises = [];
     media_list.forEach(element =>{

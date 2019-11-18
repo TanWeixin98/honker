@@ -145,7 +145,7 @@ app.post('/additem', (req, res, next) => {
     if(utils.send_response(res, json) == true) return;
     json['username'] = username;
 
-    var base_url =  media_server + "/lookup/";
+    var base_url =  media_server + "/lookup/" + username + "/";
     var promises = utils.lookup_media_promises(base_url, json.media);
     Promise.all(promises)
             .then(() => {
@@ -154,7 +154,6 @@ app.post('/additem', (req, res, next) => {
 
             })
             .catch(err =>{
-                    console.log(err)
                     utils.send_response(res, {"status":"error", "error":"Not all media has been uploaded"}); 
             })
 });
@@ -233,11 +232,9 @@ app.post('/item/:id/like', (req, res, next) => {
 
 app.post('/addmedia', (req, res, next) => {
       var username = cookies.readAuthToken(req.signedCookies);
-      console.log(username)
       if(!request_checker.verify(username, res)) return;
 
       var url = media_server + "/media";
-      console.log(url)
       req.pipe(request({url:url, json: true})).pipe(res);
 });
 
