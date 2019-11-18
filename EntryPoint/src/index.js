@@ -145,6 +145,11 @@ app.post('/additem', (req, res, next) => {
     if(utils.send_response(res, json) == true) return;
     json['username'] = username;
 
+    if(json.media.length ==0){
+      messenger.sendRPCMessage(JSON.stringify(json), "", "add_item").then((response) => res.json(response));
+      return;
+    }
+    
     var base_url =  media_server + "/lookup/" + username + "/";
     var promises = utils.lookup_media_promises(base_url, json.media);
                             

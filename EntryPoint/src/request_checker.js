@@ -41,6 +41,7 @@ module.exports = {
 
         var id = uuidv4();
         req['id'] = id;
+        req['media'] = media;
         req['username'] = username;
         req['property'] = {"likes" : 0};
         req['retweeted'] = 0;
