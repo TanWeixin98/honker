@@ -46,12 +46,13 @@ app.post('/addUser', (req, res, next) => {
                     'addUser', 'UserAPI')
                     .then((UserAPIResponse) => {
                         if(UserAPIResponse.status == 'OK')
-                            res.json(UserAuthResponse);
+                            utils.send_response(res,UserAuthResponse);
                         else
+                            res.statusCode = 500;
                             res.json({ status: 'error', error: 'Internal error. Please try signing up again.' });
                     })
             else{
-                res.json(UserAuthResponse);
+                utils.send_response(res, UserAuthResponse);
                 return;
             }
         });
@@ -59,7 +60,7 @@ app.post('/addUser', (req, res, next) => {
 
 app.post('/verify', (req, res, next) => {
     messenger.sendRPCMessage(JSON.stringify(req.body), 'verify', 'UserAuth')
-        .then((response) => res.json(response));
+        .then((response) => utils.send_response(res, response));
 });
 
 app.post('/login', (req, res, next) => {
@@ -67,14 +68,14 @@ app.post('/login', (req, res, next) => {
         .then((response) => {
             if(response.status == 'OK')
                 res.cookie('authToken', cookies.createAuthToken(req.body.username), { signed: true });
-            res.json(response);
+            utils.send_response(res, response);
         });
 });
 
 app.post('/logout', (req, res, next) => {
     var username =  cookies.clearAuthToken(req, res, next);
     messenger.sendRPCMessage(JSON.stringify({username: username}), 'logout', 'UserAuth')
-        .then((response) => res.json(response));
+        .then((response) => utils.send_response( res, response));
 });
 
 // UserAPI -Brian
@@ -87,7 +88,7 @@ app.get('/currentUser', (req, res, next) => {
 
 app.get('/user/:username', (req, res, next) => {
     messenger.sendRPCMessage(JSON.stringify({username: req.params.username}), 'getUser', 'UserAPI')
-        .then((response) => res.json(response));
+        .then((response) => utils.send_response(res,response));
 });
 
 
@@ -95,45 +96,45 @@ app.get('/user/:username/posts', (req, res, next) => {
     var limit = request_checker.checkLimit(req.query.limit)
     var currentTime = Math.round((new Date()).getTime() / 1000);
     if(limit == null){
-        res.json({ status: 'error', error: 'The provided limit is invalid' })
+        utils.send_response(res,{ status: 'error', error: 'The provided limit is invalid' })
         return;
     }
     messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, getIDOnly: true, limit: limit, timestamp: currentTime }), '', 'search_item')
-        .then((response) => res.json(response));
+        .then((response) => utils.send_response(res, response));
 });
 
 app.get('/user/:username/followers', (req, res, next) => {
     var limit = request_checker.checkLimit(req.query.limit)
     var currentTime = Math.round((new Date()).getTime() / 1000);
     if(limit == null){
-        res.json({ status: 'error', error: 'The provided limit is invalid' })
+        utils.send_response(res, { status: 'error', error: 'The provided limit is invalid' })
         return;
     }
     messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, limit: limit }), 'getFollowers', 'UserAPI')
-        .then((response) => res.json(response));
+        .then((response) => utils.send_response(res, response));
 });
 
 app.get('/user/:username/following', (req, res, next) => {
     var limit = request_checker.checkLimit(req.query.limit)
     var currentTime = Math.round((new Date()).getTime() / 1000);
     if(limit == null){
-        res.json({ status: 'error', error: 'The provided limit is invalid' })
+        utils.send_response(res, { status: 'error', error: 'The provided limit is invalid' })
         return;
     }
     messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, limit: limit }), 'getFollowing', 'UserAPI')
-        .then((response) => res.json(response));
+        .then((response) => utils.send_response(res, response));
 });
 
 app.post('/follow', (req, res, next) => {
     var follower = cookies.readAuthToken(req.signedCookies);
     if(!follower){
-        res.json({ status: 'error', error: 'You must be logged in to follow.' });
+        utils.send_response(res, { status: 'error', error: 'You must be logged in to follow.' });
         console.log('Unable to follow a user without being logged in');
         return;
     }
     var toFollow = req.body.follow==null ? true : req.body.follow;
     messenger.sendRPCMessage(JSON.stringify({ follower: follower, followee: req.body.username, toFollow: toFollow }), 'followUser', 'UserAPI')
-        .then((response) => res.json(response));
+        .then((response) => utils.send_response(res, response));
 });
 
 //tweet -Weixin
