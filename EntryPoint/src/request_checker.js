@@ -127,7 +127,7 @@ module.exports = {
     msg_json['replies'] = replies;
     msg_json['timestamp'] = ts;
     msg_json['limit'] = limit;
-    msg_json['has_media'] = false;
+    msg_json['has_media'] = hasMedia;
     return msg_json;
   }
 }
