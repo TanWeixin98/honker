@@ -138,6 +138,8 @@ app.post('/additem', (req, res, next) => {
     var json = request_checker.add_item_check(req.body, username);
     if(utils.send_response(res, json) == true) return;
     json['username'] = username;
+    //TODO: Check media id is valid
+    //
 
     messenger.sendRPCMessage(JSON.stringify(json), "", "add_item")
         .then((response) => res.json(response));
@@ -205,7 +207,7 @@ app.post('/item/:id/like', (req, res, next) => {
       return;
     }
 
-    messenger.sendRPCMessage(JSON.stringify({id : id , like: like}), "", "like_item")
+    messenger.sendRPCMessage(JSON.stringify({id : id , like: like, username: username}), "", "like_item")
             .then((response) => utils.send_response(res,response));
 });
 

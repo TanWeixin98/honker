@@ -18,19 +18,31 @@ module.exports = {
 
     add_item_check: function(req, username){
         var content = req.content;
+        var tweet_parent = req.parent;
         var childType = req.childType;
         var validType = ["retweet", "reply"];
         if(childType != null && validType.indexOf(childType) == -1){
             return {"status":"error", "error":"Invalid childType"};
-        }else if(content === undefined){
+        }else{
+            if(tweet_parent === undefined)
+                return {"status" : "error", "error" : "Reply or Retweeted Post Without Parent Id"};
+            req['parent'] = tweet_parent;
+        }
+        if(content === undefined){
             return {"status": "error", "error":"No content"};
         }
+        if(childType === undefined){
+          req['childType'] = null;
+        }
+
         var id = uuidv4();
         req['id'] = id;
         req['username'] = username;
         req['property'] = {"likes" : 0};
         req['retweeted'] = 0;
         req['timestamp'] = Math.round((new Date()).getTime() / 1000);
+        req['interest'] = 0;
+        req['like_list'] = [];
         return req;
     },
 
@@ -59,6 +71,10 @@ module.exports = {
     var search_query = req.q;
     var search_user = req.username;
     var following = req.following;
+    var rank = req.rank;
+    var parent_id = req.parent;
+    var replies = req.replies;
+    var hasMedia = req.hasMedia;
 
     if(limit === undefined)
       limit = 25;
@@ -74,7 +90,23 @@ module.exports = {
     
     if(search_query !== undefined && search_query != "")
       msg_json['query'] = search_query
+
+    if(rank === undefined)
+      rank = "interest";
+
+    if(replies === undefined)
+      replies = true;
     
+    if(replies){
+      if(parent_id !== undefined)
+        msg_json['parent_id'] = parent_id;
+    }
+
+    if(hasMedia === undefined)
+      hasMedia = false
+
+    if(rank != 'interest' && rank != 'time')
+      return {"status":"error", "error":"Rank is not valid. It should be time or interest"};
     if(!Number.isFinite(ts) || !Number.isInteger(limit))
       return {"status":"error" , "error":"Either ts or limit is not type int."};
     else if(limit < 1)
@@ -85,9 +117,12 @@ module.exports = {
       if(following)
         msg_json["login_username"] = login_username;
     }
-    
+
+    msg_json['rank'] = rank;
+    msg_json['replies'] = replies;
     msg_json['timestamp'] = ts;
     msg_json['limit'] = limit;
+    msg_json['has_media'] = false;
     return msg_json;
   }
 }

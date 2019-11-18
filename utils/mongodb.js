@@ -37,8 +37,8 @@ module.exports = {
     });
   },
 
-  update : function(collection_name, query, update_values, callback){
-    mongodb.collection(collection_name).updateOne(query, {$set: update_values},function(err,result){
+  update : function(collection_name, query, update_query, callback){
+    mongodb.collection(collection_name).updateOne(query, update_query,function(err,result){
       if(err) return callback(err);
       return callback(null);
     });
