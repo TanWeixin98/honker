@@ -29,7 +29,7 @@ module.exports = {
     return promises;
   },
 
-  update_media_promises : function(){
+  update_media_promises : function(url, media_list){
       var promises = [];
       media_list.forEach(element =>{
         promises.push(new Promise(function(resolve, reject){
