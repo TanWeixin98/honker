@@ -21,6 +21,8 @@ function tweet_selection(tweet, following_list, replies, parent_id, has_media){
     console.log(tweet)
     if(has_media && tweet.media.length == 0){
       return null;
+    }else if(!has_media && tweet.media.length > 0){
+      return null;
     }else{
       if(!replies && tweet.childType == "reply"){
         return null;
