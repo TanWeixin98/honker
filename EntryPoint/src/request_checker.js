@@ -21,9 +21,11 @@ module.exports = {
         var tweet_parent = req.parent;
         var childType = req.childType;
         var validType = ["retweet", "reply"];
+        if(childType === undefined)
+            childType = null
         if(childType != null && validType.indexOf(childType) == -1){
             return {"status":"error", "error":"Invalid childType"};
-        }else{
+        }else if(childType != null`){
             if(tweet_parent === undefined)
                 return {"status" : "error", "error" : "Reply or Retweeted Post Without Parent Id"};
             req['parent'] = tweet_parent;
