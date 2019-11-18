@@ -47,16 +47,17 @@ app.listen(port, () => {console.log('Media services listening on port ' + port);
 
 
 //store item into fs
-app.post('/media', upload.any(), function(req, res){
+app.post('/media/:username', upload.any(), function(req, res){
         var file =  req.files[0].path;
         var id = uuidv4();
+        var username = req.params.username;
         var data = {id: id, path: file, associate: false};
         
         var fileType = mime.getType(file).match(/\w*$/g)[0];
         var new_path = path.join(media_dir, id + '.' + fileType);
         res.contentType("application/json");
 
-        mongodb.add("media", {"id":id, "type": fileType, "associate":null}, function(err){
+        mongodb.add("media", {"id":id, "type": fileType, "associate": false, "poster": username}, function(err){
                 if(err){
                         res.statusCode = 500;
                         res.json({"status": "error", "error":"Unable to store in server"});
@@ -84,12 +85,12 @@ app.get('/lookup/:username/:id', function (req, res, next){
         console.log(username)
         get_media_info(id)
                 .then(media => {
-                    if(media.associate != null){
+                    if(media.associate || media.poster != username){
                         res.statusCode = 500;
                         res.end();
                     }else{
                         var query = {id:id};
-                        var update_value = {$set: {associate: username}};
+                        var update_value = {$set: {associate: true}};
                         mongodb.update("media", query, update_value, function(err, result){
                             if(err) res.statusCode = 500;
                             else res.statusCode = 200;
