@@ -60,12 +60,14 @@ app.post('/media/:username', upload.any(), function(req, res){
         mongodb.add("media", {"id":id, "type": fileType, "associate": false, "poster": username}, function(err){
                 if(err){
                         res.statusCode = 500;
+                        logger.error("Cannot insert into db.");
                         res.json({"status": "error", "error":"Unable to store in server"});
                         res.end();
                 }else{
                         fs.rename(file, new_path, err => {
                             if(err){
                                 res.statusCode = 500;
+                                logger.error("Cannot change filename from " + file + " to " + "new_path");
                                 res.json({"status": "error", "error":"Unable to store in server"});
                             }else{
                                 res.statusCode = 200;
@@ -86,20 +88,25 @@ app.get('/lookup/:username/:id', function (req, res, next){
         get_media_info(id)
                 .then(media => {
                     if(media.associate || media.poster != username){
+                        logger.error("Media associtivity: " + media.associate + " Media poster: " + media.poster + ". user request: " + username);
                         res.statusCode = 500;
                         res.end();
                     }else{
                         var query = {id:id};
                         var update_value = {$set: {associate: true}};
                         mongodb.update("media", query, update_value, function(err, result){
-                            if(err) res.statusCode = 500;
+                            if(err){
+                                    res.statusCode = 500;
+                                    logger.error("Db update for lookup: ", err);
+                            }
                             else res.statusCode = 200;
+
                             res.end();
                         });
                     }
                 })
                 .catch(err => {
-                    console.log(err)
+                    logger.log("Look up not found");
                     res.statusCode = 404;
                     res.end();
                 })
@@ -115,6 +122,7 @@ app.get('/media/:id', function(req, res, next){
                     var file = path.join(media_dir, id+"."+ fileType);
                     fs.readFile(file, function(err, data){
                         if(err){
+                            logger.error("File reading error: ", err);
                             res.statusCode = 404;
                             res.end();
                         }else{
@@ -124,6 +132,7 @@ app.get('/media/:id', function(req, res, next){
                     });
                 })
                 .catch(err => {
+                    logger.error("Media not exist");
                     res.statusCode = 404;
                     res.end();
                 });
