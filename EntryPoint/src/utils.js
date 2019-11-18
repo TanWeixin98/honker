@@ -48,7 +48,6 @@ module.exports = {
       promises.push(new Promise(function(resolve, reject){
         axios.get(url + element)
                 .then(res => {
-                        rollback_list.push(element);
                         resolve(res)
                 })
                 .catch(err =>{
