@@ -2,14 +2,15 @@ var express = require('express');
 var cookieParser = require('cookie-parser');
 var cors = require('cors');
 var path = require('path');
-var pino = require('express-pino-logger')()
+var pinoOptions = require('./pinoConf')
+var pino = require('pino')(pinoOptions.defaultOptions())
+var pinoExpress = require('pino-express')
 var axios = require('axios');
 var request = require('request');
 
 var app = express();
-app.listen(8000, () => { console.log('EntryPoint is listening on port 8000'); });
+app.listen(process.env.PORT, () => { console.log('EntryPoint is listening on port',process.env.PORT); });
 
-console.log(path.resolve(__dirname, '../../EntryPoint'));
 
 //TODO make json contain all ip and select from it
 // For now hardcode 
@@ -24,7 +25,7 @@ app.use(cors(
         credentials: true
     }
 ));
-app.use(pino)
+app.use(pinoExpress(pino, pinoOptions.defaultOptions()))
 
 app.use(express.static(path.resolve(__dirname, '../../frontend/build')));
 
@@ -47,9 +48,10 @@ app.post('/addUser', (req, res, next) => {
                     .then((UserAPIResponse) => {
                         if(UserAPIResponse.status == 'OK')
                             utils.send_response(res,UserAuthResponse);
-                        else
+                        else{
                             res.statusCode = 500;
                             res.json({ status: 'error', error: 'Internal error. Please try signing up again.' });
+                        }
                     })
             else{
                 utils.send_response(res, UserAuthResponse);
@@ -81,6 +83,7 @@ app.post('/logout', (req, res, next) => {
 // UserAPI -Brian
 
 app.get('/currentUser', (req, res, next) => {
+    console.log('PORT', process.env.PORT)
     var username = cookies.readAuthToken(req.signedCookies);
     if(username == null) cookies.clearAuthToken(req, res, next);
     res.json({ username: username });
@@ -147,27 +150,27 @@ app.post('/additem', (req, res, next) => {
     json['username'] = username;
 
     if(json.media.length ==0){
-      messenger.sendRPCMessage(JSON.stringify(json), "", "add_item").then((response) => res.json(response));
-      return;
+        messenger.sendRPCMessage(JSON.stringify(json), "", "add_item").then((response) => res.json(response));
+        return;
     }
-    
+
     var base_url =  media_server + "/lookup/" + username + "/";
     var promises = utils.lookup_media_promises(base_url, json.media);
-                            
+
     Promise.all(promises)
-            .then(() => {
-                  base_url = media_server + "/update/";
-                  promises = utils.update_media_promises(base_url, json.media);
-                  Promise.all(promises)
-                      .then(() => {
-                            messenger.sendRPCMessage(JSON.stringify(json), "", "add_item")
-                                .then((response) => res.json(response));
-                      })
-                      .catch(err => utils.send_response(res, {"status":"error", "error":"Update associtivity failed"}))
-            })
-            .catch(err =>{
-                    utils.send_response(res, {"status":"error", "error":"Not all media has been uploaded"}); 
-            })
+        .then(() => {
+            base_url = media_server + "/update/";
+            promises = utils.update_media_promises(base_url, json.media);
+            Promise.all(promises)
+                .then(() => {
+                    messenger.sendRPCMessage(JSON.stringify(json), "", "add_item")
+                        .then((response) => res.json(response));
+                })
+                .catch(err => utils.send_response(res, {"status":"error", "error":"Update associtivity failed"}))
+        })
+        .catch(err =>{
+            utils.send_response(res, {"status":"error", "error":"Not all media has been uploaded"}); 
+        })
 });
 
 app.delete('/item/:id', (req, res, next) => {
@@ -176,22 +179,23 @@ app.delete('/item/:id', (req, res, next) => {
 
     var id = req.params.id;
     messenger.sendRPCMessage(JSON.stringify({"id":id, "username": username}), "", "delete_item")
-            .then((response) => {
-                if(response.status == 'OK'){
-                    var base_url = media_server + "/media/";
-                    var promise_list = utils.delete_media_promises(base_url, response.media);
-                    Promise.all(promise_list)
-                          .then(res => res.statusCode = 200)
-                          .catch(err => res.statusCode = 404)
-                          .finally(() => res.end());
-                }else{
-                    res.statusCode = 444;
-                    res.end();
-                }
-            });
+        .then((response) => {
+            if(response.status == 'OK'){
+                var base_url = media_server + "/media/";
+                var promise_list = utils.delete_media_promises(base_url, response.media);
+                Promise.all(promise_list)
+                    .then(res => res.statusCode = 200)
+                    .catch(err => res.statusCode = 404)
+                    .finally(() => res.end());
+            }else{
+                res.statusCode = 444;
+                res.end();
+            }
+        });
 });
 
 app.post('/search', (req, res, next) => {
+    console.log(process.env.TEST)
     res.setHeader('Content-Type', 'application/json');
     var username = cookies.readAuthToken(req.signedCookies);
     var json = request_checker.search_item_check(req.body, username);
@@ -200,9 +204,9 @@ app.post('/search', (req, res, next) => {
     if(json.login_username !== undefined){
         messenger.sendRPCMessage(JSON.stringify({ username: json.login_username, limit: null }), 'getFollowing', 'UserAPI')
             .then((response) =>{
-              var following_list = (response.status == 'OK') ?response.users :[];
-              json['following_list'] = following_list;
-              messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
+                var following_list = (response.status == 'OK') ?response.users :[];
+                json['following_list'] = following_list;
+                messenger.sendRPCMessage(JSON.stringify(json), "", "search_item")
                     .then((response) => {
                         response.currentUser = username;
                         utils.send_response(res, response)
@@ -232,28 +236,28 @@ app.post('/item/:id/like', (req, res, next) => {
     var id = req.params.id;
 
     if(like === undefined)
-      like = true;
+        like = true;
     else if(typeof like !== 'boolean'){
-      utils.send_response(res, {"status":"error" , "error":"Like is not boolean"});
-      return;
+        utils.send_response(res, {"status":"error" , "error":"Like is not boolean"});
+        return;
     }
 
     messenger.sendRPCMessage(JSON.stringify({id : id , like: like, username: username}), "", "like_item")
-            .then((response) => utils.send_response(res,response));
+        .then((response) => utils.send_response(res,response));
 });
 
 app.post('/addmedia', (req, res, next) => {
-      var username = cookies.readAuthToken(req.signedCookies);
-      if(!request_checker.verify(username, res)) return;
+    var username = cookies.readAuthToken(req.signedCookies);
+    if(!request_checker.verify(username, res)) return;
 
-      var url = media_server + "/media/"+ username;
-      req.pipe(request({url:url, json: true})).pipe(res);
+    var url = media_server + "/media/"+ username;
+    req.pipe(request({url:url, json: true})).pipe(res);
 });
 
 app.get('/media/:id', (req, res, next) => {
-      var id = req.params.id;
-      var url = media_server + "/media/" + id;
-      request.get(url).pipe(res);
+    var id = req.params.id;
+    var url = media_server + "/media/" + id;
+    request.get(url).pipe(res);
 });
 
 app.get('*', (req, res) => { res.sendFile('index.html', {root: path.resolve(__dirname, '../../frontend/build')}) });

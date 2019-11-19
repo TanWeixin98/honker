@@ -6,7 +6,7 @@ const utils = require('./tweet_utils.js');
 
 const mongo_ip = "130.245.168.214";
 const amqp_url = "amqp://localhost";
-const mongo_url = "mongodb://" + mongo_ip + "/tweet";
+const mongo_url = 'mongodb://localhost:27017/tweet';
 
 
 var logger = new Logger("tweet_micro.log");
