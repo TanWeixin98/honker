@@ -36,8 +36,10 @@ module.exports = {
                                 return;
                             }
                             console.log('Inserted new user: ' + JSON.stringify(user));
-                            emailer.sendVerification(req.email, verificationKey)
-                            resolve({ status: 'OK', msg: 'Check your email to verify your new Honker account'});
+                            if(emailer.sendVerification(req.email, verificationKey))
+                                resolve({ status: 'OK', msg: 'Check your email to verify your new Honker account'});
+                            else
+                                resolve({ status: 'error', error: 'Failed to send verification to the specified email.' })
                             // Redirect user to /verify in the frontend
                         });
                 });

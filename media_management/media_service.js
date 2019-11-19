@@ -9,7 +9,7 @@ const Logger = require('./utils/logger.js');
 const mongodb = require('./utils/mongodb.js'); 
 
 const mongo_ip = "130.245.168.214";
-const mongo_url = "mongodb://" + mongo_ip + "/media";
+const mongo_url = 'mongodb://localhost:27017/media';
 const home_dir = require('os').homedir(); 
 
 //TODO temp port

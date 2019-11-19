@@ -18,10 +18,14 @@ module.exports = {
         };
 
         transporter.sendMail(mailOptions, (error, info) => {
-            if(error) 
+            if(error) {
                 console.error('Error sending mail to ' + email + '\n' + error);
-            else
+                return false;
+            }
+            else{
                 console.log('Email sent to ' + email + '\n' + info.response);
+                return true;
+            }
         });
     }
 }

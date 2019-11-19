@@ -1,18 +1,18 @@
 module.exports = {
     defaultOptions : () =>  { return {
         //  Usage: Runs before request has entered it's route
-        /*
         startLog:{
             //  Accepts array of strings
-            req: ['req.body','req.method','req.query','req.url'],
-            //  Accepts string
-            user: 'req.user',
-            /*  Accepts object with string
+            req: ['req.body','req.method','req.query','req.url']
+        },
+        //  Accepts string
+        user: 'req.user',
+        /*  Accepts object with string
         user: {
           user_id: 'req.user.sub'
         }
         */
-            /*  Accepts object array of strings
+        /*  Accepts object array of strings
         user: {
           foo: ['req.user.bar','req.user.bar1', 'req.user.bar2']
         }
@@ -30,7 +30,11 @@ module.exports = {
             user: 'req.user',
         },
         //  Usage: Runs after request.end() has been called
-            req: ['req.body']
+        finishedLog:{
+            req: ['req.body'],
+            res: ['res.statusCode']
+        }
+
     }
     }
 }
