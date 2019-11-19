@@ -166,8 +166,8 @@ app.post('/additem', (req, res, next) => {
       return;
     }
     
-    var base_url =  media_server + "/lookup/" + username + "/";
-    var promises = utils.lookup_media_promises(base_url, json.media);
+    var base_url =  media_server + "/lookup/";
+    var promises = utils.lookup_media_promises(base_url, json.media, username);
                             
     Promise.all(promises)
             .then(() => {
@@ -261,9 +261,9 @@ app.post('/addmedia', (req, res, next) => {
       var username = cookies.readAuthToken(req.signedCookies);
       if(!request_checker.verify(username, res)) return;
 
-      var url = media_server + "/media/"+ username;
-      req.pipe(request({url:url, json: true})).pipe(res);
-});
+      var url = media_server + "/media/?username=" + username;
+      req.pipe(request.get(url)).pipe(res);
+})
 
 app.get('/media/:id', (req, res, next) => {
       var id = req.params.id;
