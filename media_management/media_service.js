@@ -17,6 +17,7 @@ var port = 9000;
 
 var app = express();
 app.use(body_parser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1000000}));
+app.use(express.json());
 
 var logger = new Logger("media")
 
@@ -52,7 +53,6 @@ app.get('/media', upload.any(), function(req, res){
         var id = uuidv4();
         var username = req.query.username;
         var data = {id: id, path: file, associate: false};
-        console.log(res)
         console.log(username);
         var fileType = mime.getType(file).match(/\w*$/g)[0];
         var new_path = path.join(media_dir, id + '.' + fileType);
@@ -82,29 +82,29 @@ app.get('/media', upload.any(), function(req, res){
 
 //verify file exist in system
 app.post('/lookup/:id', function (req, res, next){ 
-        var id = req.params.id;
-        var username = req.body.username;
-        get_media_info()
-                .then(media => {
-                    if(media.associate || media.poster != username){
-                        logger.error("Media associtivity: " + media.associate + " Media poster: " + media.poster + ". user request: " + username);
-                        res.statusCode = 500;
-                        res.end();
-                    }else{
-                       res.statusCode = 200;
-                       res.end();
-                    }
-                })
-                .catch(err => {
-                    logger.info("Look up not found");
-                    res.statusCode = 404;
-                    res.end();
-                })
+    var id = req.params.id;
+    var username = req.body.username;
+    get_media_info(id)
+        .then(media => {
+            if(media.associate || media.poster != username){
+                logger.error("Media associtivity: " + media.associate + " Media poster: " + media.poster + ". user request: " + username);
+                res.statusCode = 500;
+                res.end();
+            }else{
+                res.statusCode = 200;
+                res.end();
+            }
+        })
+        .catch(err => {
+            logger.info("Look up not found");
+            res.statusCode = 404;
+            res.end();
+        })
 });
 
 app.get('/update/:id', function(req, res, next){
     var id = req.params.id;
-    
+
     var query = {id:id};
     var update_value = {$set: {associate: true}};
     mongodb.update("media", query, update_value, function(err, result){
@@ -117,56 +117,56 @@ app.get('/update/:id', function(req, res, next){
 
 //get media in system
 app.get('/media/:id', function(req, res, next){
-        var id = req.params.id;
+    var id = req.params.id;
 
-        get_media_info(id)
-                .then(media =>{
-                    var fileType =  media.type;
-                    var file = path.join(media_dir, id+"."+ fileType);
-                    fs.readFile(file, function(err, data){
-                        if(err){
-                            logger.error("File reading error: ", err);
-                            res.statusCode = 404;
-                            res.end();
-                        }else{
-                            res.statusCode = 200;
-                            res.contentType(mime.getType(file)).sendFile(file) 
-                        }
-                    });
-                })
-                .catch(err => {
-                    logger.error("Media not exist");
+    get_media_info(id)
+        .then(media =>{
+            var fileType =  media.type;
+            var file = path.join(media_dir, id+"."+ fileType);
+            fs.readFile(file, function(err, data){
+                if(err){
+                    logger.error("File reading error: ", err);
                     res.statusCode = 404;
                     res.end();
-                });
+                }else{
+                    res.statusCode = 200;
+                    res.contentType(mime.getType(file)).sendFile(file) 
+                }
+            });
+        })
+        .catch(err => {
+            logger.error("Media not exist");
+            res.statusCode = 404;
+            res.end();
+        });
 });
 
 //remove file from system
 app.delete('/media/:id', function(req, res, next){
-        var id = req.params.id;
+    var id = req.params.id;
 
-        get_media_info(id)
-                .then(media =>{
-                    var fileType = media.type
-                    var file = path.join(media_dir, id+"."+fileType);
-                    fs.unlink(file, function(err){
-                        if(err){
-                            res.statusCode = 500;
-                            res.end();
-                        }else{
-                            mongodb.remove("media", {id:id}, function(err, result){
-                                  if(err) res.statusCode = 500;
-                                  else if(result.result.n != 1) res.statusCode = 500;
-                                  else res.statusCode = 200;
-                                  res.end();
-                        });
-                        }
-                    });
-                })
-                .catch(err => {
+    get_media_info(id)
+        .then(media =>{
+            var fileType = media.type
+            var file = path.join(media_dir, id+"."+fileType);
+            fs.unlink(file, function(err){
+                if(err){
                     res.statusCode = 500;
                     res.end();
-                });
+                }else{
+                    mongodb.remove("media", {id:id}, function(err, result){
+                        if(err) res.statusCode = 500;
+                        else if(result.result.n != 1) res.statusCode = 500;
+                        else res.statusCode = 200;
+                        res.end();
+                    });
+                }
+            });
+        })
+        .catch(err => {
+            res.statusCode = 500;
+            res.end();
+        });
 });
 
 function get_media_info(id){

@@ -23,6 +23,7 @@ module.exports = {
                         return;
                     }
                     var verificationKey = Math.floor(100000 + Math.random() * 900000);
+                    console.log('testing')
                     var user = {
                         email: req.email,
                         password: req.password,
@@ -35,12 +36,8 @@ module.exports = {
                                 resolve({ status: 'error', error: 'Failed to add new user. Please try again later.' });
                                 return;
                             }
-                            console.log('Inserted new user: ' + JSON.stringify(user));
-                            if(emailer.sendVerification(req.email, verificationKey))
-                                resolve({ status: 'OK', msg: 'Check your email to verify your new Honker account'});
-                            else
-                                resolve({ status: 'error', error: 'Failed to send verification to the specified email.' })
-                            // Redirect user to /verify in the frontend
+                            emailer.sendVerification(req.email, verificationKey)
+                            resolve({ status: 'OK', msg: 'Check your email to verify your new Honker account'});
                         });
                 });
         });
