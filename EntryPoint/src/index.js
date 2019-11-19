@@ -11,6 +11,19 @@ var request = require('request');
 var app = express();
 app.listen(process.env.PORT, () => { console.log('EntryPoint is listening on port',process.env.PORT); });
 
+//error handler
+app.use(function(req, res, next){
+      var err = null;
+      try{
+            decodeURIComponent(req.path);
+      }catch(e){
+            console.log(err, req.url);
+            res.statusCode = 400;
+            res.end();
+            return;
+      }
+      next();
+});
 
 //TODO make json contain all ip and select from it
 // For now hardcode 
