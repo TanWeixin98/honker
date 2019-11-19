@@ -7,6 +7,21 @@ var axios = require('axios');
 var request = require('request');
 
 var app = express();
+
+//error handler
+app.use(function(req, res, next){
+      var err = null;
+      try{
+            decodeURIComponent(req.path);
+      }catch(e){
+            console.log(err, req.url);
+            res.statusCode = 400;
+            res.end();
+            return;
+      }
+      next();
+});
+
 app.listen(8000, () => { console.log('EntryPoint is listening on port 8000'); });
 
 console.log(path.resolve(__dirname, '../../EntryPoint'));
