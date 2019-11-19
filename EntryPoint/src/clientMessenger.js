@@ -19,7 +19,7 @@ module.exports = {
                     replyTo: REPLY_QUEUE,
                     type: endpoint // Use this to specify which endpoint so the service can figure out which function to call
                 })
-            console.log('Sent', { func: endpoint, msg: message });
+            //console.log('Sent', { func: endpoint, msg: message });
         });
     },
 
@@ -33,7 +33,7 @@ module.exports = {
                 channel.consume(REPLY_QUEUE,
                     (msg) => {
                         channel.responseEmitter.emit(msg.properties.correlationId, JSON.parse(msg.content));
-                        console.log('Received', msg.content.toString());
+                        //console.log('Received', msg.content.toString());
                     },
                     {noAck: true});
 

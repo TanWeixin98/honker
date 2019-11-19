@@ -20,6 +20,7 @@
     "express": "^4.17.1",
     "express-pino-logger": "^4.0.0",
     "package.json": "^2.0.1",
+    "pino-express": "^1.1.1",
     "random-key": "^0.3.2",
     "request": "^2.88.0",
     "uuid": "^3.3.3"
