@@ -20,8 +20,6 @@ app.use(body_parser.urlencoded({limit: '50mb', extended: true, parameterLimit: 1
 
 var logger = new Logger("media")
 
-app.use(cookieParser('TeamLiquid :('));
-
 var media_dir = path.join(home_dir,"/media");
 if(!fs.existsSync(media_dir)) fs.mkdirSync(media_dir);
 
@@ -54,6 +52,7 @@ app.get('/media', upload.any(), function(req, res){
         var id = uuidv4();
         var username = req.query.username;
         var data = {id: id, path: file, associate: false};
+        console.log(res)
         console.log(username);
         var fileType = mime.getType(file).match(/\w*$/g)[0];
         var new_path = path.join(media_dir, id + '.' + fileType);
