@@ -42,11 +42,11 @@ module.exports = {
       return promises;
   },
 
-  lookup_media_promises : function(url, media_list){
+  lookup_media_promises : function(url, media_list, username){
     var promises = [];
     media_list.forEach(element =>{
       promises.push(new Promise(function(resolve, reject){
-        axios.get(url + element)
+        axios.post(url + element, "username="+username)
                 .then(res => {
                         resolve(res)
                 })

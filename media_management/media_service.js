@@ -47,12 +47,13 @@ app.listen(port, () => {console.log('Media services listening on port ' + port);
 
 
 //store item into fs
-app.post('/media/:username', upload.any(), function(req, res){
+app.get('/media', upload.any(), function(req, res){
         var file =  req.files[0].path;
         var id = uuidv4();
-        var username = req.params.username;
+        var username = req.query.username;
         var data = {id: id, path: file, associate: false};
-        
+        console.log(res)
+        console.log(username);
         var fileType = mime.getType(file).match(/\w*$/g)[0];
         var new_path = path.join(media_dir, id + '.' + fileType);
         res.contentType("application/json");
@@ -80,11 +81,10 @@ app.post('/media/:username', upload.any(), function(req, res){
 });
 
 //verify file exist in system
-app.get('/lookup/:username/:id', function (req, res, next){ 
+app.post('/lookup/:id', function (req, res, next){ 
         var id = req.params.id;
-        var username = req.params.username;
- 
-        get_media_info(id)
+        var username = req.body.username;
+        get_media_info()
                 .then(media => {
                     if(media.associate || media.poster != username){
                         logger.error("Media associtivity: " + media.associate + " Media poster: " + media.poster + ". user request: " + username);
@@ -96,7 +96,7 @@ app.get('/lookup/:username/:id', function (req, res, next){
                     }
                 })
                 .catch(err => {
-                    logger.log("Look up not found");
+                    logger.info("Look up not found");
                     res.statusCode = 404;
                     res.end();
                 })
