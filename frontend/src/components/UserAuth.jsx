@@ -27,7 +27,6 @@ class UserAuth extends Component {
                 : "I need to create an account",
             header: this.props.isRegister ? "Sign up" : "Log in"
         }
-        console.log('123')
     }
 
     componentWillUnmount() {
@@ -37,9 +36,7 @@ class UserAuth extends Component {
         this._isMounted = true;
     }
 
-
     render() {
-        console.log(this.state.isRegister)
         let errorAlert, emailForm;
         if (this.state.error.length > 0)
             errorAlert = <Alert variant="danger">{this.state.error}</Alert>;
@@ -83,7 +80,11 @@ class UserAuth extends Component {
                                 onChange={this.handleChange}
                             />
                         </Form.Group>
-                        <Button variant="primary" type="submit" className='justify-content-md-center'>
+                        <Button
+                            id={this.state.isRegister ? 'registerButton' : 'loginButton'}
+                            variant="primary"
+                            type="submit"
+                            className='justify-content-md-center'>
                             Submit
                         </Button>
                         <div onClick={this.handleSignInText} className="m-2 unselectable" style={{ cursor: "pointer" }}>
