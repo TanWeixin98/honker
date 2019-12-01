@@ -1,0 +1,137 @@
+- hosts: all
+  become: true
+  vars:
+    - homeDir: /home/ubuntu
+    - appDir: /home/ubuntu/honker
+    - privateKey: ~/.ssh/id_rsa
+    - packages: ['git','nodejs','npm','nginx']
+    - services: ['Email', 'EntryPoint', 'UserAPI', 'UserAuthAPI', 'frontend', 'media_management', 'tweet_management']
+    - repo: git@github.com:TanWeixin98/honker.git
+  tasks:
+    - name: Update apt
+      apt: update_cache=yes
+
+    - name: Install Packages
+      apt: name={{ packages }} state=latest
+
+      # Git
+    - name: Copy Private Key
+      copy: src={{privateKey}} dest={{homeDir}} mode=0600
+    - name: Create Projects directory
+      file:
+        path: "{{appDir}}"
+        state: directory
+    - name: Clone Git repo
+      git: repo={{repo}} dest={{appDir}} update=yes force=yes accept_hostkey=yes key_file={{homeDir}}/id_rsa
+      register: git_finished
+
+      # pm2
+    - name: Install pm2
+      npm: name=pm2 global=yes
+
+      # MongoDB
+    - name: Import Key (Mongo)
+      apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=7F0CEB10 state=present
+    - name: MongoDB - Add repository
+      apt_repository:
+        filename: '/etc/apt/sources.list.d/mongodb-org-3.2.list'
+        repo: 'deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse'
+        state: present
+    - name: MongoDB - Install MongoDB
+      apt:
+        name: mongodb-org
+        state: present
+        update_cache: yes
+        force: yes
+    - name: Start MongoDB
+      service: 
+        name: mongod
+        state: started
+
+      # Erlang
+    - name: Install Erlang Solutions PGP key
+      apt_key:
+        url: http://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
+        state: present
+      tags:
+        - erlang
+
+    - name: Add Erlang Solutions repository
+      apt_repository:
+        repo: 'deb http://packages.erlang-solutions.com/ubuntu {{ ansible_distribution_release|lower }} contrib'
+        state: present
+      tags:
+        - erlang
+
+    - name: Install Erlang packages
+      apt:
+        name: esl-erlang
+        state: present
+        update_cache: yes
+      tags:
+        - erlang
+
+      # Rabbit_MQ
+    - name: Add the RabbitMQ APT key
+      apt_key: url=https://www.rabbitmq.com/rabbitmq-release-signing-key.asc state=present
+      tags:
+        - rmq
+    - name: Add the RabbitMQ source to the APT source list
+      apt_repository: repo="deb https://dl.bintray.com/rabbitmq/debian xenial main" state=present
+      tags:
+        - rmq
+    - name: Install RabbitMQ
+      apt: 
+        name: rabbitmq-server
+        state: present
+        update_cache: yes
+      tags:
+        - rmq
+    - name: Start RabbitMQ
+      systemd:
+          name: rabbitmq-server.service
+          state: started
+      tags:
+        - rmq
+    - name: Enable RabbitMQ
+      systemd:
+          name: rabbitmq-server.service
+          enabled: yes
+      tags:
+        - rmq
+
+      # Nginx
+    - name: Start nginx
+      service:
+          name: nginx
+          state: started
+    - name: Copy top-level nginx config file
+      copy: 
+          src: /etc/nginx/nginx.conf
+          dest: /etc/nginx/nginx.conf
+    - name: Copy nginx config file
+      copy:
+          src: /etc/nginx/sites-available/CSE356.conf
+          dest: /etc/nginx/sites-available/default
+    - name: Create symblink
+      file:
+          src: /etc/nginx/sites-available/default
+          dest: /etc/nginx/sites-enabled/default
+          state: link
+    - name: Restart nginx
+      service: 
+        name: nginx
+        state: restarted
+    
+      # npm install
+    - name: Run npm install
+      npm: path={{homeDir}}/honker/{{ item }}
+      with_items: "{{ services }}"
+      register: npm_finished
+      when: git_finished.changed
+    
+
+    - name: Start services
+      command: pm2 start {{homeDir}}/honker/ecosystem.config.js
+      ignore_errors: yes
+      when: npm_finished.changed
