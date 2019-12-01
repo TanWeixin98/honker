@@ -85,7 +85,7 @@ class UserAuth extends Component {
                             variant="primary"
                             type="submit"
                             className='justify-content-md-center'>
-                            Submit
+                            {this.state.isRegister ? 'Register' : 'Log in'}
                         </Button>
                         <div onClick={this.handleSignInText} className="m-2 unselectable" style={{ cursor: "pointer" }}>
                             {this.state.registerText}
