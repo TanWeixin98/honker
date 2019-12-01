@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import { Form, Container, Button, Row, Alert } from "react-bootstrap"
+import { withRouter } from 'react-router-dom';
 import './../css/UserAuth.css'
+import API from "../constants";
 
 class UserAuth extends Component {
     state = {
@@ -16,8 +18,16 @@ class UserAuth extends Component {
 
     constructor(props) {
         super(props);
-
         this._isMounted = false;
+        this.state = {
+            ...this.state,
+            isRegister: this.props.isRegister,
+            registerText: this.props.isRegister
+                ? "I already have an account"
+                : "I need to create an account",
+            header: this.props.isRegister ? "Sign up" : "Log in"
+        }
+        console.log('123')
     }
 
     componentWillUnmount() {
@@ -29,6 +39,7 @@ class UserAuth extends Component {
 
 
     render() {
+        console.log(this.state.isRegister)
         let errorAlert, emailForm;
         if (this.state.error.length > 0)
             errorAlert = <Alert variant="danger">{this.state.error}</Alert>;
@@ -85,12 +96,14 @@ class UserAuth extends Component {
     }
 
     handleSignInText = () => {
-        const isRegister = !this.state.isRegister;
+        const isRegister = !this.state.isRegister
         const registerText = isRegister
             ? "I already have an account"
             : "I need to create an account";
         const header = isRegister ? "Sign up" : "Log in";
-        this.setState({ isRegister, registerText, header });
+        this.setState({ isRegister, registerText, header }, () => {
+            this.props.history.replace(isRegister ? '/addUser' : '/login')
+        });
     };
 
     handleChange = e => {
@@ -105,10 +118,9 @@ class UserAuth extends Component {
             username: this.state.username,
             password: this.state.pw
         };
-        if(this.state.isRegister)
+        if (this.state.isRegister)
             data['email'] = this.state.email;
-        const url = "http://honker.cse356.compas.cs.stonybrook.edu/"
-            + (this.state.isRegister ? "addUser" : "login");
+        const url = API + (this.state.isRegister ? "/addUser" : "/login");
         //console.log(this.props);
         fetch(url, {
             method: "POST",
@@ -146,4 +158,4 @@ class UserAuth extends Component {
     }
 }
 
-export default UserAuth
+export default withRouter(UserAuth)

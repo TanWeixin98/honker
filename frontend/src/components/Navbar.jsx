@@ -25,12 +25,14 @@ class NavBar extends Component {
   }
 
   render() {
-    var loginButton, userDropdown, searchModal;
+    var addUserButton, loginButton, userDropdown, searchModal;
     if (this.state.isAuthenticated) {
+      addUserButton = undefined;
       loginButton = undefined;
       userDropdown = this.userDropdown;
     }
     else {
+      addUserButton = <LinkContainer to='/addUser'><Nav.Link>Register</Nav.Link></LinkContainer>
       loginButton = <LinkContainer to='/login'><Nav.Link>Login</Nav.Link></LinkContainer>;
       userDropdown = undefined;
     }
@@ -55,6 +57,7 @@ class NavBar extends Component {
         </LinkContainer>
 
         <Navbar.Collapse className="justify-content-end">
+          {addUserButton}
           {loginButton}
           {userDropdown}
         </Navbar.Collapse>

@@ -23,7 +23,8 @@ function App() {
                     <NavBar/>
                     <Switch>
                         <Route exact path='/' component={HomePage}/>
-                        <Route path='/login' component={UserAuth}/>
+                        <Route path='/login' render={props => <UserAuth {...props} isRegister={false}/>}/>
+                        <Route path='/adduser' render={props => <UserAuth {...props} isRegister={true}/>}/>
                         <Route path='/verify' component={Verify}/>
                         <Route path='/post' component={PostItem}/>
                         <Route path='/tweets' component={Tweets}/>

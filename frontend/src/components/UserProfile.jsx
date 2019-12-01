@@ -198,7 +198,7 @@ class UserProfile extends Component {
     getPosts = () => {
         if (this.state.error) return
         const url = API + '/search'
-        var payload = {username: this.state.username, following: false}
+        var payload = {username: this.state.username, following: false, rank:'time'}
 
         fetch(url, {
             method: "POST",

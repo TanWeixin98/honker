@@ -34,10 +34,6 @@ class PostItem extends Component {
                             </Form.Group>
                         </Form>
                     </Modal.Body>
-                    <Form.Control as="textarea" rows="3"
-                                  onChange={this.handleChange}
-                                  placeholder="What do you want to honk about?">
-                    </Form.Control>
                     <Modal.Footer>
                         <Button onClick={this.handleSubmit}>
                             Submit
