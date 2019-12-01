@@ -38,8 +38,8 @@ class Verify extends Component {
                                 onChange={this.handleChange}
                             />
                         </Form.Group>
-                        <Button variant="primary" type="submit" className='justify-content-md-center'>
-                            Submit
+                        <Button variant="primary" type="submit" className='justify-content-md-center' id='VerifyButton'>
+                            Verify
                         </Button>
                     </Form>
                 </Row>

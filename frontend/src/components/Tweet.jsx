@@ -6,7 +6,7 @@ import {toast} from 'react-toastify';
 import './../css/tweet.css';
 import API from "../constants";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faReply, faRetweet, faTrash} from '@fortawesome/free-solid-svg-icons'
+import {faReply, faTrash} from '@fortawesome/free-solid-svg-icons'
 import Rehonk from "./Rehonk";
 import TweetSnippet from "./TweetSnippet";
 import RehonkButton from "./RehonkButton";
@@ -29,7 +29,6 @@ class Tweet extends Component {
     }
 
     render() {
-        console.log('tweet', this.state.timesRehonked)
         const deleteButton = this.props.currentUser === this.props.username ?
             <Button size="sm" variant="outline-*" onClick={this.showDeleteModal}>
                 <FontAwesomeIcon icon={faTrash} color={'grey'}/>

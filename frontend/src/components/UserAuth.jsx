@@ -1,6 +1,8 @@
 import React, { Component } from "react"
 import { Form, Container, Button, Row, Alert } from "react-bootstrap"
+import { withRouter } from 'react-router-dom';
 import './../css/UserAuth.css'
+import API from "../constants";
 
 class UserAuth extends Component {
     state = {
@@ -14,10 +16,29 @@ class UserAuth extends Component {
         error: ""
     };
 
+    componentDidUpdate(prevProps) {
+        if (this.props.location.pathname !== prevProps.location.pathname)
+            this.updateForm(this.state.isRegister)
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.isRegister !== prevState.isRegister)
+            return { isRegister: nextProps.isRegister }
+        else
+            return null;
+    }
+
     constructor(props) {
         super(props);
-
         this._isMounted = false;
+        this.state = {
+            ...this.state,
+            isRegister: this.props.isRegister,
+            registerText: this.props.isRegister
+                ? "I already have an account"
+                : "I need to create an account",
+            header: this.props.isRegister ? "Sign up" : "Log in"
+        }
     }
 
     componentWillUnmount() {
@@ -26,7 +47,6 @@ class UserAuth extends Component {
     componentDidMount() {
         this._isMounted = true;
     }
-
 
     render() {
         let errorAlert, emailForm;
@@ -72,10 +92,14 @@ class UserAuth extends Component {
                                 onChange={this.handleChange}
                             />
                         </Form.Group>
-                        <Button variant="primary" type="submit" className='justify-content-md-center'>
-                            Submit
+                        <Button
+                            id={this.state.isRegister ? 'registerButton' : 'loginButton'}
+                            variant="primary"
+                            type="submit"
+                            className='justify-content-md-center'>
+                            {this.state.isRegister ? 'Register' : 'Log in'}
                         </Button>
-                        <div onClick={this.handleSignInText} className="m-2 unselectable" style={{ cursor: "pointer" }}>
+                        <div onClick={this.changeForm} className="m-2 unselectable" style={{ cursor: "pointer" }}>
                             {this.state.registerText}
                         </div>
                     </Form>
@@ -84,14 +108,19 @@ class UserAuth extends Component {
         );
     }
 
-    handleSignInText = () => {
-        const isRegister = !this.state.isRegister;
+    changeForm = () => {
+        this.updateForm(!this.state.isRegister)
+    };
+
+    updateForm = (isRegister) => {
         const registerText = isRegister
             ? "I already have an account"
             : "I need to create an account";
         const header = isRegister ? "Sign up" : "Log in";
-        this.setState({ isRegister, registerText, header });
-    };
+        this.setState({ isRegister, registerText, header }, () => {
+            this.props.history.replace(isRegister ? '/addUser' : '/login')
+        });
+    }
 
     handleChange = e => {
         e.preventDefault();
@@ -105,10 +134,9 @@ class UserAuth extends Component {
             username: this.state.username,
             password: this.state.pw
         };
-        if(this.state.isRegister)
+        if (this.state.isRegister)
             data['email'] = this.state.email;
-        const url = "http://honker.cse356.compas.cs.stonybrook.edu/"
-            + (this.state.isRegister ? "addUser" : "login");
+        const url = API + (this.state.isRegister ? "/addUser" : "/login");
         //console.log(this.props);
         fetch(url, {
             method: "POST",
@@ -146,4 +174,4 @@ class UserAuth extends Component {
     }
 }
 
-export default UserAuth
+export default withRouter(UserAuth)

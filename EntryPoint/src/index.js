@@ -13,16 +13,16 @@ app.listen(process.env.PORT, () => { console.log('EntryPoint is listening on por
 
 //error handler
 app.use(function(req, res, next){
-      var err = null;
-      try{
-            decodeURIComponent(req.path);
-      }catch(e){
-            console.log(err, req.url);
-            res.statusCode = 400;
-            res.end();
-            return;
-      }
-      next();
+    var err = null;
+    try{
+        decodeURIComponent(req.path);
+    }catch(e){
+        console.log(err, req.url);
+        res.statusCode = 400;
+        res.end();
+        return;
+    }
+    next();
 });
 
 //TODO make json contain all ip and select from it
@@ -54,10 +54,9 @@ request_checker.init(app);
 app.post('/addUser', (req, res, next) => {
     messenger.sendRPCMessage(JSON.stringify(req.body), 'addUser', 'UserAuth')
         .then((UserAuthResponse) => {
-            if(UserAuthResponse.status == 'OK')
-                UserAPIResponse: messenger.sendRPCMessage(
-                    JSON.stringify({username: req.body.username, email: req.body.email}),
-                    'addUser', 'UserAPI')
+            if(UserAuthResponse.status == 'OK'){
+                messenger.sendRPCMessage(
+                    JSON.stringify({username: req.body.username, email: req.body.email}), 'addUser', 'UserAPI')
                     .then((UserAPIResponse) => {
                         if(UserAPIResponse.status == 'OK')
                             utils.send_response(res,UserAuthResponse);
@@ -66,6 +65,8 @@ app.post('/addUser', (req, res, next) => {
                             res.json({ status: 'error', error: 'Internal error. Please try signing up again.' });
                         }
                     })
+                messenger.sendRPCMessage(JSON.stringify({ email: req.body.email, verificationKey: UserAuthResponse.verificationKey }), null, 'Emailer')
+            }
             else{
                 utils.send_response(res, UserAuthResponse);
                 return;
@@ -166,10 +167,10 @@ app.post('/additem', (req, res, next) => {
         messenger.sendRPCMessage(JSON.stringify(json), "", "add_item").then((response) => res.json(response));
         return;
     }
-    
+
     var base_url =  media_server + "/lookup/";
     var promises = utils.lookup_media_promises(base_url, json.media, username);
-                            
+
     Promise.all(promises)
         .then(() => {
             base_url = media_server + "/update/";
@@ -263,8 +264,8 @@ app.post('/addmedia', (req, res, next) => {
     var username = cookies.readAuthToken(req.signedCookies);
     if(!request_checker.verify(username, res)) return;
 
-      var url = media_server + "/media/?username=" + username;
-      req.pipe(request.get(url)).pipe(res);
+    var url = media_server + "/media/?username=" + username;
+    req.pipe(request.get(url)).pipe(res);
 })
 
 app.get('/media/:id', (req, res, next) => {

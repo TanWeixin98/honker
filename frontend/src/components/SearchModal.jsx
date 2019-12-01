@@ -13,7 +13,8 @@ class SearchModal extends Component {
         q: null,
         username: null,
         limit: null,
-        timestamp: null
+        timestamp: null,
+        rank: 'interest'
     }
 
     render() {
@@ -50,6 +51,13 @@ class SearchModal extends Component {
                                             dateFormat="MM/dd/yyyy h:mm aa"
                                             customInput={<Form.Control />}
                                         />
+                                    </Form.Group>
+                                    <Form.Group as={Col} controlId='rank'>
+                                        <Form.Label>Sort by:</Form.Label><br/>
+                                        <Form.Control as='select' onChange={this.handleChange}>
+                                            <option value='interest'>Interest</option>
+                                            <option value='time'>Time</option>
+                                        </Form.Control>
                                     </Form.Group>
                                 </Form.Row>
                             </Form.Group>
@@ -93,6 +101,9 @@ class SearchModal extends Component {
             case 'checkbox':
                 this.setState({ [e.target.id]: e.target.checked })
                 break
+            case 'select-one':
+                this.setState({ [e.target.id]: e.target.value })
+                break;
             default:
                 break
 

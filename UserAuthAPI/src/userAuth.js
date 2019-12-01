@@ -1,4 +1,3 @@
-const emailer = require( './email' );
 const db = require('./dbUtils').getDB().collection('Users');
 
 module.exports = {
@@ -36,8 +35,9 @@ module.exports = {
                                 resolve({ status: 'error', error: 'Failed to add new user. Please try again later.' });
                                 return;
                             }
-                            emailer.sendVerification(req.email, verificationKey)
-                            resolve({ status: 'OK', msg: 'Check your email to verify your new Honker account'});
+                            //emailer.sendVerification(req.email, verificationKey)
+                            //Emailing moved to Email service to be hosted on OpenStack
+                            resolve({ status: 'OK', msg: 'Check your email to verify your new Honker account', verificationKey: verificationKey });
                         });
                 });
         });
@@ -63,7 +63,7 @@ module.exports = {
                     }
                     else{
                         console.error(req.email + ' tried to verify with incorrect key');
-                        resolve({status: 'error', error: 'Inccorect key'});
+                        resolve({status: 'error', error: 'Incorect key'});
                     }
                 });
         });
