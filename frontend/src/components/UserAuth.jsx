@@ -16,6 +16,18 @@ class UserAuth extends Component {
         error: ""
     };
 
+    componentDidUpdate(prevProps) {
+        if (this.props.location.pathname !== prevProps.location.pathname)
+            this.updateForm(this.state.isRegister)
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.isRegister !== prevState.isRegister)
+            return { isRegister: nextProps.isRegister }
+        else
+            return null;
+    }
+
     constructor(props) {
         super(props);
         this._isMounted = false;
@@ -87,7 +99,7 @@ class UserAuth extends Component {
                             className='justify-content-md-center'>
                             {this.state.isRegister ? 'Register' : 'Log in'}
                         </Button>
-                        <div onClick={this.handleSignInText} className="m-2 unselectable" style={{ cursor: "pointer" }}>
+                        <div onClick={this.changeForm} className="m-2 unselectable" style={{ cursor: "pointer" }}>
                             {this.state.registerText}
                         </div>
                     </Form>
@@ -96,8 +108,11 @@ class UserAuth extends Component {
         );
     }
 
-    handleSignInText = () => {
-        const isRegister = !this.state.isRegister
+    changeForm = () => {
+        this.updateForm(!this.state.isRegister)
+    };
+
+    updateForm = (isRegister) => {
         const registerText = isRegister
             ? "I already have an account"
             : "I need to create an account";
@@ -105,7 +120,7 @@ class UserAuth extends Component {
         this.setState({ isRegister, registerText, header }, () => {
             this.props.history.replace(isRegister ? '/addUser' : '/login')
         });
-    };
+    }
 
     handleChange = e => {
         e.preventDefault();

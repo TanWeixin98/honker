@@ -39,7 +39,7 @@ class UserProfile extends Component {
             return null;
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps) {
         if (prevProps.match.params.username !== this.state.username)
             this.setUserState()
     }
