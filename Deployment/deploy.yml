@@ -4,11 +4,14 @@
     - role: elasticsearch
       tags:
         - elasticsearch
+    - role: nodejs
+      tags:
+        - nodejs
   vars:
-    - homeDir: /home/ubuntu
-    - appDir: /home/ubuntu/honker
+    - homeDir: /home/tanweixin1234
+    - appDir: /home/tanweixin1234/honker
     - privateKey: ~/.ssh/id_rsa
-    - packages: ['git','nodejs','npm','nginx']
+    - packages: ['git','nginx']
     - services: ['Email', 'EntryPoint', 'UserAPI', 'UserAuthAPI', 'frontend', 'media_management', 'tweet_management']
     - pipPackages: ['mongo-connector', 'elastic-doc-manager[elastic2]']
     - repo: git@github.com:TanWeixin98/honker.git
@@ -28,30 +31,39 @@
         state: directory
     - name: Clone Git repo
       git: repo={{repo}} dest={{appDir}} update=yes force=yes accept_hostkey=yes key_file={{homeDir}}/id_rsa
-      register: git_finished
 
       # pm2
     - name: Install pm2
-      npm: name=pm2 global=yes
+      npm: name=pm2 global=yes state=latest
+      tags: 
+        - npmg
 
       # MongoDB
     - name: Import Key (Mongo)
-      apt_key: keyserver=hkp://keyserver.ubuntu.com:80 id=7F0CEB10 state=present
+      apt_key: url=https://www.mongodb.org/static/pgp/server-4.2.asc
+      tags: 
+        - mongodb
     - name: MongoDB - Add repository
       apt_repository:
-        filename: '/etc/apt/sources.list.d/mongodb-org-3.2.list'
-        repo: 'deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse'
+        filename: '/etc/apt/sources.list.d/mongodb-org-4.2.list'
+        repo: 'deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse'
         state: present
+      tags: 
+        - mongodb
     - name: MongoDB - Install MongoDB
       apt:
         name: mongodb-org
         state: present
         update_cache: yes
         force: yes
+      tags: 
+        - mongodb
     - name: Start MongoDB
       service: 
         name: mongod
         state: started
+      tags: 
+        - mongodb
 
       # Erlang
     - name: Install Erlang Solutions PGP key
@@ -139,17 +151,19 @@
         - nginx
 
       # Java
-    - name: Add Java ppa
-      apt_repository: repo="ppa:ts.sch.gr/ppa" state=present
-      tags:
-        - java
-    - name: Install Java
-      apt:
-        name: oracle-java8-installer
-        update_cache: yes
-        allow_unauthenticated: yes
-      tags:
-        - java
+      #- name: Add Java ppa
+      #apt_repository: repo="ppa:ts.sch.gr/ppa" state=present 
+      #tags:
+          #- java
+          #- name: Install Java
+          #apt:
+          #name: oracle-java8-installer
+          #update_cache: yes
+          #allow_unauthenticated: yes
+        #force_apt_get: yes
+        #ignore_errors: yes
+        #tags:
+        #- java
 
       # Python3
     - name: Add Python 3.6 PPA
@@ -171,6 +185,12 @@
         state: latest
       tags:
         - python
+    - name: Install SetupTools
+      apt:
+        name: python-setuptools
+        state: present
+      tags:
+        - python
       
       # Pip
     - name: Install Python packages with Pip3
@@ -184,10 +204,28 @@
     - name: Run npm install
       npm: path={{homeDir}}/honker/{{ item }}
       with_items: "{{ services }}"
-      register: npm_finished
-      when: git_finished.changed
+      # mongodb
+    - name: Install mongodb (npm)
+      npm: name=mongodb state=latest path={{appDir}}
+      tags:
+        - npmg
+      # nodejs-logger
+    - name: Install nodejslogger (npm)
+      npm: name=nodejslogger state=latest path={{appDir}}
+      tags:
+        - npmg
+      # Create log directory
+    - name: Create /log directory for nodejslogger
+      file:
+        path: "{{homeDir}}/log"
+        state: directory
+        mode: 0777
+      
+    
 
-    - name: Start services
-      command: pm2 start {{homeDir}}/honker/ecosystem.config.js
-      ignore_errors: yes
-      when: npm_finished.changed
+        #- name: Start services
+        #command: pm2 start ecosystem.config.js
+        #args:
+        # chdir: "{{appDir}}"
+        #tags:
+        # - start_pm2

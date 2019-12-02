@@ -4,7 +4,7 @@ module.exports = {
             name: "EntryPoint",
             script: "./EntryPoint/src/index.js",
             watch: true,
-            instances: 3,
+            instances: 5,
             exec_mode: "cluster",
             increment_var: 'PORT',
             env: {
@@ -18,20 +18,16 @@ module.exports = {
             watch: true
         },
         {
-            name: "Emailer",
-            script: "./Email/index.js",
-            watch: true
-        },
-        {
             name: "User",
             script: "./UserAPI/src/index.js",
+            instances: 2,
             watch: true
         },
         {
             name: "Tweet",
             script: "./tweet_management/tweet_service.js",
             watch: true,
-            instances: 3
+            instances: 5
         },
         {
             name: "Media",
