@@ -160,7 +160,8 @@ amqp.connect(amqp_url, function(connection_err, connection){
                     "limit" : payload.limit, 
                     "projections": {},
                     "query" : payload.query,
-                    "sort_rule": sort_rule}, 
+                    "sort_rule": sort_rule, 
+                    "rank" : payload.rank},
                     function(err, result){
                         var res = {};
                         if(err){
@@ -219,7 +220,7 @@ function del_item(payload, callback){
 function search_item(id, options, callback){
     console.log(options)
     if(options.query !== undefined){
-        elastic.text_search(options.query, (err, result) =>{
+        elastic.text_search(options,(err, result) =>{
           if(err && err.message == "No matche") return callback(null, []);
           if(err) return callback(err);
           return callback(null, result);

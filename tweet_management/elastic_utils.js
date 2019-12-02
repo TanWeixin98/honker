@@ -8,18 +8,28 @@ const client = new elasticsearch.Client({
 
 module.exports = {
 
-  text_search : function(search_text, callback){
+  text_search : function(options, callback){
       let query = {
-        query :{
-          match: {
-                  content : {query : search_text}
-          }
+        bool: {
+          must : [
+            {match: {
+              content : {query : options.query}
+            }}
+          ],
+          filter : [
+            {range :{
+              timestamp:{
+                lte: options.timestamp
+              }
+            }}
+          ] 
         }
       }
       client.search({
         index: "tweet",
         body: query,
-        size: 9999
+        size: options.limit * 2,
+        sort: options.rank +" :asc"
       }, (err, result) =>{
         result = result.body.hits.hits;
         if(err) return callback(err, null);
