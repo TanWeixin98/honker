@@ -1,11 +1,16 @@
 - hosts: all
   become: true
+  roles: 
+    - role: elasticsearch
+      tags:
+        - elasticsearch
   vars:
     - homeDir: /home/ubuntu
     - appDir: /home/ubuntu/honker
     - privateKey: ~/.ssh/id_rsa
     - packages: ['git','nodejs','npm','nginx']
     - services: ['Email', 'EntryPoint', 'UserAPI', 'UserAuthAPI', 'frontend', 'media_management', 'tweet_management']
+    - pipPackages: ['mongo-connector', 'elastic-doc-manager[elastic2]']
     - repo: git@github.com:TanWeixin98/honker.git
   tasks:
     - name: Update apt
@@ -105,23 +110,75 @@
       service:
           name: nginx
           state: started
+      tags:
+        - nginx
     - name: Copy top-level nginx config file
       copy: 
           src: /etc/nginx/nginx.conf
           dest: /etc/nginx/nginx.conf
+      tags:
+        - nginx
     - name: Copy nginx config file
       copy:
           src: /etc/nginx/sites-available/CSE356.conf
           dest: /etc/nginx/sites-available/default
+      tags:
+        - nginx
     - name: Create symblink
       file:
           src: /etc/nginx/sites-available/default
           dest: /etc/nginx/sites-enabled/default
           state: link
+      tags:
+        - nginx
     - name: Restart nginx
       service: 
         name: nginx
         state: restarted
+      tags:
+        - nginx
+
+      # Java
+    - name: Add Java ppa
+      apt_repository: repo="ppa:ts.sch.gr/ppa" state=present
+      tags:
+        - java
+    - name: Install Java
+      apt:
+        name: oracle-java8-installer
+        update_cache: yes
+        allow_unauthenticated: yes
+      tags:
+        - java
+
+      # Python3
+    - name: Add Python 3.6 PPA
+      apt_repository: repo="ppa:jonathonf/python-3.6" state=present
+      tags:
+        - python
+    - name: Install python3
+      apt: 
+        name: python3.6
+        force: yes
+        state: present
+        update_cache: yes
+      tags:
+        - python
+    - name: Install pip3
+      apt:
+        name: python3-pip
+        force: yes
+        state: latest
+      tags:
+        - python
+      
+      # Pip
+    - name: Install Python packages with Pip3
+      pip:
+        name: "{{ pipPackages }}"
+        executable: pip3
+      tags:
+        - pip
     
       # npm install
     - name: Run npm install
@@ -129,7 +186,6 @@
       with_items: "{{ services }}"
       register: npm_finished
       when: git_finished.changed
-    
 
     - name: Start services
       command: pm2 start {{homeDir}}/honker/ecosystem.config.js
