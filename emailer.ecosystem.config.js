@@ -4,7 +4,7 @@ module.exports = {
         {
             name: "Emailer",
             script: "./Email/index.js",
-            instances: 2,
+            instances: 4,
             watch: true
         }
     ]
