@@ -157,7 +157,7 @@ amqp.connect(amqp_url, function(connection_err, connection){
                   var sort_rule = {'timestamp': -1}
                 search_item(payload.id, {"timestamp" : payload.timestamp, 
                     "username": payload.username,
-                    "limit" : payload.limit, 
+                    "limit" : limit, 
                     "projections": {},
                     "query" : payload.query,
                     "sort_rule": sort_rule, 
@@ -218,7 +218,6 @@ function del_item(payload, callback){
 }
 
 function search_item(id, options, callback){
-    console.log(options)
     if(options.query !== undefined){
         elastic.text_search(options,(err, result) =>{
           if(err && err.message == "No matche") return callback(null, []);
