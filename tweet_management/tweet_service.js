@@ -3,6 +3,7 @@ const amqp = require('amqplib/callback_api');
 const Logger = require('./utils/logger.js');
 const mongodb = require('./utils/mongodb.js');
 const utils = require('./tweet_utils.js');
+const elastic = require('./elastic_utils.js');
 
 const mongo_ip = "130.245.168.214";
 const amqp_url = "amqp://localhost";
@@ -20,7 +21,7 @@ mongodb.start_connection(mongo_url, "tweet", function(db_err){
     mongodb.index('tweet', {username : "text", content: "text"}, function(index_err){
         if(index_err){
             logger.error("Failed to index username and content for tweets");
-            return;
+            exit();
         }
     });
 });
@@ -154,13 +155,13 @@ amqp.connect(amqp_url, function(connection_err, connection){
                   var sort_rule = {'interest': -1};
                 else
                   var sort_rule = {'timestamp': -1}
-                console.log(sort_rule)
                 search_item(payload.id, {"timestamp" : payload.timestamp, 
                     "username": payload.username,
                     "limit" : payload.limit, 
                     "projections": {},
                     "query" : payload.query,
-                    "sort_rule": sort_rule}, 
+                    "sort_rule": sort_rule, 
+                    "rank" : payload.rank},
                     function(err, result){
                         var res = {};
                         if(err){
@@ -217,6 +218,16 @@ function del_item(payload, callback){
 }
 
 function search_item(id, options, callback){
+    console.log(options)
+    if(options.query !== undefined){
+        elastic.text_search(options,(err, result) =>{
+          if(err && err.message == "No matche") return callback(null, []);
+          if(err) return callback(err);
+          return callback(null, result);
+        });
+        return;
+    }
+        
     if(id === undefined){
         var query = {timestamp: {$lte: options.timestamp}};
         if(options.username !== undefined) query['username'] = options.username;
