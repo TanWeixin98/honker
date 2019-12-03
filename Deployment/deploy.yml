@@ -104,6 +104,12 @@
         update_cache: yes
       tags:
         - rmq
+    - name: Copy rabbitmq.config
+      copy:
+        src: ../rabbitmq.config
+        dest: /etc/rabbitmq
+      tags:
+        - rmq
     - name: Start RabbitMQ
       systemd:
           name: rabbitmq-server.service

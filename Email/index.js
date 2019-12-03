@@ -1,6 +1,6 @@
 const amqp = require('amqplib');
-const RABBITMQ = 'amqp://localhost'
-const open = amqp.connect(RABBITMQ);
+const RABBITMQ = 'amqp://35.245.241.197'
+const open = amqp.connect(RABBITMQ)
 const q = 'Emailer';
 
 const nodemailer = require('nodemailer');
@@ -11,7 +11,7 @@ const transporter = nodemailer.createTransport({
         rejectUnauthorized: false
     }
 });
-
+console.log('start')
 open
     .then((conn) => {
         console.log(`[ ${new Date()} ] Server started`);
