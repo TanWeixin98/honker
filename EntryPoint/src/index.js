@@ -9,7 +9,7 @@ var axios = require('axios');
 var request = require('request');
 
 var app = express();
-app.listen(process.env.PORT, () => { console.log('EntryPoint is listening on port',process.env.PORT); });
+app.listen(8000, () => { console.log('EntryPoint is listening on port',process.env.PORT); });
 
 //error handler
 app.use(function(req, res, next){
