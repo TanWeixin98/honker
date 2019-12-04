@@ -9,7 +9,7 @@
     - appDir: /home/ubuntu/honker
     - privateKey: ~/.ssh/id_rsa
     - packages: ['git','nginx']
-    - services: ['EntryPoint']
+    - services: ['EntryPoint', 'frontend']
     - repo: git@github.com:TanWeixin98/honker.git
   tasks:
     - name: Update apt
@@ -162,6 +162,12 @@
         path: "{{homeDir}}/log"
         state: directory
         mode: 0777
+    - name: Create frontend
+      command: npm run build
+      args:
+        chdir: "{{appDir}}/frontend"
+      tags:
+        - git
       
     
 

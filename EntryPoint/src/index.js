@@ -27,7 +27,7 @@ app.use(function(req, res, next){
 
 //TODO make json contain all ip and select from it
 // For now hardcode 
-var media_server = "http://localhost:9000"
+var media_server = "http://10.150.0.4:9000"
 
 app.use(express.json());
 app.use(express.urlencoded({limit: '50mb', extended: false,parameterLimit: 1000000 }));
@@ -116,7 +116,7 @@ app.get('/user/:username/posts', (req, res, next) => {
         utils.send_response(res,{ status: 'error', error: 'The provided limit is invalid' })
         return;
     }
-    messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, getIDOnly: true, limit: limit, timestamp: currentTime }), '', 'search_item')
+    messenger.sendRPCMessage(JSON.stringify({ username: req.params.username, getIDOnly: true, limit: limit, timestamp: currentTime, rank: 'interest' }), '', 'search_item')
         .then((response) => utils.send_response(res, response));
 });
 

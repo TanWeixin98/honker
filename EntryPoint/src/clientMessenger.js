@@ -3,7 +3,7 @@ var EventEmitter = require('events');
 var uuidv4 = require('uuid/v4');
 
 const REPLY_QUEUE = 'amq.rabbitmq.reply-to';
-const RABBITMQ_URL = 'amqp://localhost';
+const RABBITMQ_URL = 'amqp://test:test@10.150.0.4';
 var _channel;
 
 module.exports = {
