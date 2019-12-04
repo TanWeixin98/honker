@@ -74,11 +74,7 @@ module.exports = {
             var username = req.username;
             var password = req.password;
             if(!username) resolve({ status: 'error', error: 'No username provided' });
-            db.findOne({ 
-                $and: [
-                    { username: req.username }, 
-                    { password: req.password }
-                ]})
+            db.findOne({ username: req.username, password: req.password })
                 .then((user) => {
                     console.log(user)
                     if(!user){

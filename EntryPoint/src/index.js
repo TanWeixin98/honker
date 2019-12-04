@@ -192,7 +192,7 @@ app.delete('/item/:id', (req, res, next) => {
     if(!request_checker.verify(username, res)) return;
 
     var id = req.params.id;
-    messenger.sendRPCMessage(JSON.stringify({"id":id, "username": username}), "", "delete_item")
+    messenger.sendRPCMessage(JSON.stringify({"_id":id, "username": username}), "", "delete_item")
         .then((response) => {
             if(response.status == 'OK'){
                 var base_url = media_server + "/media/";
@@ -239,7 +239,7 @@ app.get('/item/:id', (req, res, next) => {
     res.setHeader('Content-Type', 'application/json');
     var id = req.params.id;
 
-    messenger.sendRPCMessage(JSON.stringify({"id" : id }), "", "search_item")
+    messenger.sendRPCMessage(JSON.stringify({"_id" : id }), "", "search_item")
         .then((response) => utils.send_response(res, response));
 });
 
@@ -256,7 +256,7 @@ app.post('/item/:id/like', (req, res, next) => {
         return;
     }
 
-    messenger.sendRPCMessage(JSON.stringify({id : id , like: like, username: username}), "", "like_item")
+    messenger.sendRPCMessage(JSON.stringify({_id : id , like: like, username: username}), "", "like_item")
         .then((response) => utils.send_response(res,response));
 });
 

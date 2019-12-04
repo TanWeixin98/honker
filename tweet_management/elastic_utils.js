@@ -1,7 +1,7 @@
 const elasticsearch = require('@elastic/elasticsearch');
 
 const client = new elasticsearch.Client({
-        node : "http://192.168.122.12:9200",
+        node : "http://localhost:9200",
         log: 'error'
 });
 
@@ -9,32 +9,34 @@ const client = new elasticsearch.Client({
 module.exports = {
 
   text_search : function(options, callback){
-    let query = {
-        "sort": [{
-          [options.rank] : {"order": "asc"}
-        }],
+    var q = {
         query:{
           bool: {
-            must : [
-              {match: {
-                content : options.query
-              }}
-            ],
-            filter : [
-              {range :{
-                timestamp:{
-                  lte: options.timestamp
-                }
-              }}
-            ] 
+            must : []
           }
-        }
-      }
-      client.search({
+       	}
+    }
+    if(options.rank !== undefined) {
+       q['sort'] =  [{[options.rank] : {"order": "desc"}}];
+    }
+    if(options.query !== undefined){
+    	q['query']['bool']['must'].push({match:{content:options.query}});
+    }
+
+    if(options.username !== undefined){
+    	q['query']['bool']['must'].push({match:{username:
+							{ 'query': options.username,
+							  'minimum_should_match' : options.username.length }}});
+    }
+    if(options.timestamp !== undefined){
+        q['query']['bool']['filter'] = [({range :{timestamp:{lte: options.timestamp }}})];     
+    }
+    
+    client.search({
         index: "tweet",
-        body: query,
-        size: options.limit * 2,
-      }, (err, result) =>{
+        body: q,
+        size: options.limit,
+    }, (err, result) =>{
         if(err) return callback(err, null);
         result = result.body.hits.hits;
         if(result.length == 0) return callback(new Error("No matches"), null)

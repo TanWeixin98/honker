@@ -14,7 +14,6 @@ module.exports = {
     });
     return tweets_following;
   }
-
 }
 
 function tweet_selection(tweet, following_list, replies, parent_id, has_media){    
