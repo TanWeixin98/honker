@@ -98,6 +98,9 @@ module.exports = {
 
     if(rank === undefined)
       rank = "interest";
+    
+    if(rank == 'time')
+      rank = 'timestamp'
 
     if(replies === undefined)
       replies = true;
