@@ -80,7 +80,6 @@ module.exports = {
                     { password: req.password }
                 ]})
                 .then((user) => {
-                    console.log(user)
                     if(!user){
                         console.log('Invalid login for %s %s', username, password);
                         resolve({ status: 'error', error: 'The username or password provided is incorrect.' });
