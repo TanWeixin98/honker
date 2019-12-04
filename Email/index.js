@@ -1,5 +1,5 @@
 const amqp = require('amqplib');
-const RABBITMQ = 'amqp://35.245.241.197'
+const RABBITMQ = 'amqp://test:test@35.221.38.106';
 const open = amqp.connect(RABBITMQ)
 const q = 'Emailer';
 

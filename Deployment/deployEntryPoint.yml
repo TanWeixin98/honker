@@ -1,9 +1,6 @@
 - hosts: all
   become: true
   roles: 
-    - role: elasticsearch
-      tags:
-        - elasticsearch
     - role: nodejs
       tags:
         - nodejs
@@ -12,8 +9,7 @@
     - appDir: /home/ubuntu/honker
     - privateKey: ~/.ssh/id_rsa
     - packages: ['git','nginx']
-    - services: ['Email', 'EntryPoint', 'UserAPI', 'UserAuthAPI', 'frontend', 'media_management', 'tweet_management']
-    - pipPackages: ['mongo-connector', 'elastic-doc-manager[elastic2]']
+    - services: ['EntryPoint']
     - repo: git@github.com:TanWeixin98/honker.git
   tasks:
     - name: Update apt
@@ -31,39 +27,14 @@
         state: directory
     - name: Clone Git repo
       git: repo={{repo}} dest={{appDir}} update=yes force=yes accept_hostkey=yes key_file={{homeDir}}/id_rsa
+      tags:
+        - git
 
       # pm2
     - name: Install pm2
       npm: name=pm2 global=yes state=latest
       tags: 
         - npmg
-
-      # MongoDB
-    - name: Import Key (Mongo)
-      apt_key: url=https://www.mongodb.org/static/pgp/server-4.2.asc
-      tags: 
-        - mongodb
-    - name: MongoDB - Add repository
-      apt_repository:
-        filename: '/etc/apt/sources.list.d/mongodb-org-4.2.list'
-        repo: 'deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse'
-        state: present
-      tags: 
-        - mongodb
-    - name: MongoDB - Install MongoDB
-      apt:
-        name: mongodb-org
-        state: present
-        update_cache: yes
-        force: yes
-      tags: 
-        - mongodb
-    - name: Start MongoDB
-      service: 
-        name: mongod
-        state: started
-      tags: 
-        - mongodb
 
       # Erlang
     - name: Install Erlang Solutions PGP key
@@ -171,41 +142,6 @@
         #tags:
         #- java
 
-      # Python3
-    - name: Add Python 3.6 PPA
-      apt_repository: repo="ppa:jonathonf/python-3.6" state=present
-      tags:
-        - python
-    - name: Install python3
-      apt: 
-        name: python3.6
-        force: yes
-        state: present
-        update_cache: yes
-      tags:
-        - python
-    - name: Install pip3
-      apt:
-        name: python3-pip
-        force: yes
-        state: latest
-      tags:
-        - python
-    - name: Install SetupTools
-      apt:
-        name: python-setuptools
-        state: present
-      tags:
-        - python
-      
-      # Pip
-    - name: Install Python packages with Pip3
-      pip:
-        name: "{{ pipPackages }}"
-        executable: pip3
-      tags:
-        - pip
-    
       # npm install
     - name: Run npm install
       npm: path={{homeDir}}/honker/{{ item }}
