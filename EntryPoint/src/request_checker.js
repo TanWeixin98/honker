@@ -99,9 +99,6 @@ module.exports = {
     if(rank === undefined)
       rank = "interest";
     
-    if(rank == 'time')
-      rank = 'timestamp'
-
     if(replies === undefined)
       replies = true;
     
@@ -115,6 +112,10 @@ module.exports = {
 
     if(rank != 'interest' && rank != 'time')
       return {"status":"error", "error":"Rank is not valid. It should be time or interest"};
+    
+    if(rank == 'time')
+      rank = 'timestamp'
+
     if(!Number.isFinite(ts) || !Number.isInteger(limit))
       return {"status":"error" , "error":"Either ts or limit is not type int."};
     else if(limit < 1)
