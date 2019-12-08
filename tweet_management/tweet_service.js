@@ -18,12 +18,6 @@ mongodb.start_connection(mongo_url, "tweet", function(db_err){
         return;
     }
     logger.info("Connected to mongodb");
-    mongodb.index('tweet', {username : "text", content: "text"}, function(index_err){
-        if(index_err){
-            logger.error("Failed to index username and content for tweets");
-            exit();
-        }
-    });
 });
 
 amqp.connect(amqp_url, function(connection_err, connection){
@@ -151,16 +145,10 @@ amqp.connect(amqp_url, function(connection_err, connection){
                 var limit = payload.limit;
                 payload.limit = 0;
                 
-                if(payload.rank == 'interest')
-                  var sort_rule = {'interest': -1};
-                else
-                  var sort_rule = {'timestamp': -1}
                 search_item(payload.id, {"timestamp" : payload.timestamp, 
                     "username": payload.username,
                     "limit" : limit, 
-                    "projections": {},
                     "query" : payload.query,
-                    "sort_rule": sort_rule, 
                     "rank" : payload.rank},
                     function(err, result){
                         var res = {};
@@ -218,26 +206,14 @@ function del_item(payload, callback){
 }
 
 function search_item(id, options, callback){
-    if(options.query !== undefined){
+    if(id === undefined){
         elastic.text_search(options,(err, result) =>{
-          if(err && err.message == "No matche") return callback(null, []);
+          console.log(result)
+          if(err && err.message == "No matches") return callback(null, []);
           if(err) return callback(err);
           return callback(null, result);
         });
         return;
-    }
-        
-    if(id === undefined){
-        var query = {timestamp: {$lte: options.timestamp}};
-        if(options.username !== undefined) query['username'] = options.username;
-        if(options.query !== undefined){
-            query['$text'] = {$search: options.query};
-        }
-        mongodb.search("tweet", query, options.projections ,options.limit, options.sort_rule,function(err, result){
-            if(err && err.message == "No matches") return callback(null, []);
-            if(err) return callback(err, null);
-            return callback(null, result);
-        });
     }else{
         var query = {id: id};
         mongodb.search("tweet", query,  {_id: 0, interest: 0}, 1 , {}, function(err, result){
@@ -261,10 +237,15 @@ function like_item(payload, callback){
     var query = {id : payload.id};
     var projections = {_id : 0, like_list : 1, property : 1, interest : 1};
     var username = payload.username;
+	
+    var options = {
+	username : payload.username,
+	limit : 1
+    }
 
 
-    mongodb.search("tweet", query, projections, 1, {}, function(err, result){
-      if(err) return callack(err);
+    elastic.text_search(options , function(err, result){
+      if(err) return callback(err);
 
       var likes = result[0].property.likes;
       var like_list = result[0].like_list;

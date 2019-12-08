@@ -5,8 +5,10 @@ require( './dbUtils' )
         'UserAuth',
         (err) => {
             if(err) console.log(err);
-            else
+            else{
                 userAuth = require('./userAuth')
+		console.log('Conncted to DB')
+	    }
         }
     );
 
