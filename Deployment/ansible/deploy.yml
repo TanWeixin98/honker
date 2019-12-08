@@ -1,0 +1,237 @@
+- hosts: all
+  become: true
+  roles: 
+    - role: elasticsearch
+      tags:
+        - elasticsearch
+    - role: nodejs
+      tags:
+        - nodejs
+  vars:
+    - homeDir: /home/ubuntu
+    - appDir: /home/ubuntu/honker
+    - privateKey: ~/.ssh/id_rsa
+    - packages: ['git','nginx']
+    - services: ['Email', 'EntryPoint', 'UserAPI', 'UserAuthAPI', 'frontend', 'media_management', 'tweet_management']
+    - pipPackages: ['mongo-connector', 'elastic-doc-manager[elastic2]']
+    - repo: git@github.com:TanWeixin98/honker.git
+  tasks:
+    - name: Update apt
+      apt: update_cache=yes
+
+    - name: Install Packages
+      apt: name={{ packages }} state=latest
+
+      # Git
+    - name: Copy Private Key
+      copy: src={{privateKey}} dest={{homeDir}} mode=0600
+    - name: Create Projects directory
+      file:
+        path: "{{appDir}}"
+        state: directory
+    - name: Clone Git repo
+      git: repo={{repo}} dest={{appDir}} update=yes force=yes accept_hostkey=yes key_file={{homeDir}}/id_rsa
+
+      # pm2
+    - name: Install pm2
+      npm: name=pm2 global=yes state=latest
+      tags: 
+        - npmg
+
+      # MongoDB
+    - name: Import Key (Mongo)
+      apt_key: url=https://www.mongodb.org/static/pgp/server-4.2.asc
+      tags: 
+        - mongodb
+    - name: MongoDB - Add repository
+      apt_repository:
+        filename: '/etc/apt/sources.list.d/mongodb-org-4.2.list'
+        repo: 'deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse'
+        state: present
+      tags: 
+        - mongodb
+    - name: MongoDB - Install MongoDB
+      apt:
+        name: mongodb-org
+        state: present
+        update_cache: yes
+        force: yes
+      tags: 
+        - mongodb
+    - name: Start MongoDB
+      service: 
+        name: mongod
+        state: started
+      tags: 
+        - mongodb
+
+      # Erlang
+    - name: Install Erlang Solutions PGP key
+      apt_key:
+        url: http://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
+        state: present
+      tags:
+        - erlang
+
+    - name: Add Erlang Solutions repository
+      apt_repository:
+        repo: 'deb http://packages.erlang-solutions.com/ubuntu {{ ansible_distribution_release|lower }} contrib'
+        state: present
+      tags:
+        - erlang
+
+    - name: Install Erlang packages
+      apt:
+        name: esl-erlang
+        state: present
+        update_cache: yes
+      tags:
+        - erlang
+
+      # Rabbit_MQ
+    - name: Add the RabbitMQ APT key
+      apt_key: url=https://www.rabbitmq.com/rabbitmq-release-signing-key.asc state=present
+      tags:
+        - rmq
+    - name: Add the RabbitMQ source to the APT source list
+      apt_repository: repo="deb https://dl.bintray.com/rabbitmq/debian xenial main" state=present
+      tags:
+        - rmq
+    - name: Install RabbitMQ
+      apt: 
+        name: rabbitmq-server
+        state: present
+        update_cache: yes
+      tags:
+        - rmq
+    - name: Copy rabbitmq.config
+      copy:
+        src: ../rabbitmq.config
+        dest: /etc/rabbitmq
+      tags:
+        - rmq
+    - name: Start RabbitMQ
+      systemd:
+          name: rabbitmq-server.service
+          state: started
+      tags:
+        - rmq
+    - name: Enable RabbitMQ
+      systemd:
+          name: rabbitmq-server.service
+          enabled: yes
+      tags:
+        - rmq
+
+      # Nginx
+    - name: Start nginx
+      service:
+          name: nginx
+          state: started
+      tags:
+        - nginx
+    - name: Copy top-level nginx config file
+      copy: 
+          src: /etc/nginx/nginx.conf
+          dest: /etc/nginx/nginx.conf
+      tags:
+        - nginx
+    - name: Copy nginx config file
+      copy:
+          src: /etc/nginx/sites-available/CSE356.conf
+          dest: /etc/nginx/sites-available/default
+      tags:
+        - nginx
+    - name: Create symblink
+      file:
+          src: /etc/nginx/sites-available/default
+          dest: /etc/nginx/sites-enabled/default
+          state: link
+      tags:
+        - nginx
+    - name: Restart nginx
+      service: 
+        name: nginx
+        state: restarted
+      tags:
+        - nginx
+
+      # Java
+      #- name: Add Java ppa
+      #apt_repository: repo="ppa:ts.sch.gr/ppa" state=present 
+      #tags:
+          #- java
+          #- name: Install Java
+          #apt:
+          #name: oracle-java8-installer
+          #update_cache: yes
+          #allow_unauthenticated: yes
+        #force_apt_get: yes
+        #ignore_errors: yes
+        #tags:
+        #- java
+
+      # Python3
+    - name: Add Python 3.6 PPA
+      apt_repository: repo="ppa:jonathonf/python-3.6" state=present
+      tags:
+        - python
+    - name: Install python3
+      apt: 
+        name: python3.6
+        force: yes
+        state: present
+        update_cache: yes
+      tags:
+        - python
+    - name: Install pip3
+      apt:
+        name: python3-pip
+        force: yes
+        state: latest
+      tags:
+        - python
+    - name: Install SetupTools
+      apt:
+        name: python-setuptools
+        state: present
+      tags:
+        - python
+      
+      # Pip
+    - name: Install Python packages with Pip3
+      pip:
+        name: "{{ pipPackages }}"
+        executable: pip3
+      tags:
+        - pip
+    
+      # npm install
+    - name: Run npm install
+      npm: path={{homeDir}}/honker/{{ item }}
+      with_items: "{{ services }}"
+      # mongodb
+    - name: Install mongodb (npm)
+      npm: name=mongodb state=latest path={{appDir}}
+      tags:
+        - npmg
+      # nodejs-logger
+    - name: Install nodejslogger (npm)
+      npm: name=nodejslogger state=latest path={{appDir}}
+      tags:
+        - npmg
+      # Create log directory
+    - name: Create /log directory for nodejslogger
+      file:
+        path: "{{homeDir}}/log"
+        state: directory
+        mode: 0777
+      
+    
+
+        #- name: Start services
+        #command: pm2 start ecosystem.config.js
+        #args:
+        # chdir: "{{appDir}}"
+        #tags:
+        # - start_pm2
